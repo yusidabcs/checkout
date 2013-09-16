@@ -1,6 +1,7 @@
 {
     "name": "yusidabcs/checkout",
-    "description": "",
+    "description": "Jarvis checkout.",
+    "license": "BSD-2-Clause",
     "authors": [
         {
             "name": "yusidabcs",
