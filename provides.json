@@ -1,0 +1,7 @@
+{
+	"providers": [
+		"Yusidabcs\Checkout\CheckoutServiceProvider"
+	],
+	"aliases": [
+	]
+}
