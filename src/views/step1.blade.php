@@ -130,26 +130,22 @@
                             <div class="span6 well">
                                 <h4>Anggota</h4>
                                 <small>Silahkan login untuk mempercepat transaksi</small><hr>
-                                <form class="form-inline">                                                                    
+                                <form class="form" action="{{URL::to('member/login')}}" method="post">
                                     <div class="control-group">
-                                        <div class="controls">
-                                            <input type="text" id="inputEmail" class="input-large" placeholder="Email">
-                                        </div>
+                                    <div class="controls">
+                                      <input type="email" name="email" id="inputEmail" placeholder="Email" required>
+                                    </div>
                                     </div>
                                     <div class="control-group">
-                                        <div class="controls">
-                                            <input type="password" id="inputPassword" class="input-large" placeholder="Password">
-                                        </div>
+                                    <div class="controls">
+                                      <input type="password" name="password" id="inputPassword" placeholder="Password" required>
+                                    </div>
                                     </div>
                                     <div class="control-group">
-                                        <div class="controls">
-                                            <button type="submit" class="btn btn-info">Sign in</button>
-                                        </div>
+                                    <div class="controls">
+                                      <button type="submit" class="btn theme">Login</button>
+                                      <a href="{{URL::to('forgetpassword')}}" class="btn btn-link">Forget password?</a>
                                     </div>
-                                    <div class="control-group">
-                                        <div class="controls">
-                                            <a href="#">Lupa Password?</a>
-                                        </div>
                                     </div>
                                 </form>
                             </div>
