@@ -107,12 +107,17 @@
                 <div class="navbar-inner">
                     <div class="container-fluid container-narrow">
                         <!-- start: Header Menu -->
-                        <a target="_blank" class="brand" href="{{URL::to('')}}"><span>{{$kontak->nama}}</span></a>
+                        <a class="brand" href="{{URL::to('')}}"><span>{{$kontak->nama}}</span></a>
                         <div class="nav-no-collapse header-nav">
                             <ul class="nav pull-right">
                                 <li><a class="btn" href="{{URL::to('')}}">
                                         Lanjut Belanja &rarr;
-                                    </a></li>                   
+                                    </a></li>       
+                                @if (Sentry::check())
+                                    <li><a class="btn" href="#">
+                                    Welcome {{Sentry::getUser()->nama}}
+                                    </a></li>       
+                                @endif                                            
                             </ul>
                         </div>
                         <!-- end: Header Menu -->
