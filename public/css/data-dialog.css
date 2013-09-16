@@ -1,0 +1,30 @@
+
+.cart_dialog .mini-cart-info table { border-collapse: collapse; width: 100%; margin-bottom: 5px; }
+.cart_dialog .mini-cart-info td { color: #444; vertical-align: middle; padding: 10px 5px; border-bottom: 1px solid #EEEEEE; }
+.cart_dialog .mini-cart-info .image { width: 1px; }
+.cart_dialog .mini-cart-info .image img { text-align: left; }
+.cart_dialog .mini-cart-info .name small { color: #666;}
+.cart_dialog .mini-cart-info .quantity { text-align: right; }
+.cart_dialog .mini-cart-info td.total { text-align: right; }
+.cart_dialog .mini-cart-info .remove { text-align: right; }
+.cart_dialog .mini-cart-info .remove img { cursor: pointer; }
+.cart_dialog .mini-cart-total { text-align: right; }
+.cart_dialog .mini-cart-total table { border-collapse: collapse; display: inline-block; margin-bottom: 5px; }
+.cart_dialog .mini-cart-total td { color: #555; padding: 4px; }
+.cart_dialog #cart .checkout { text-align: right; clear: both; }
+.cart_dialog #cart .empty { padding-top: 50px; text-align: center; }
+
+/************* Button *************/
+a.button-dialog, a.button2 { display:inline-block; padding:0px; background:#ccc; text-decoration:none; cursor:pointer; -webkit-transition: all 0.3s ease-in-out; -moz-transition: all 0.3s ease-in-out; -o-transition: all 0.3s ease-in-out; -ms-transition: all 0.3s ease-in-out; transition: all 0.3s ease-in-out; border:#ccc 1px solid; box-shadow:0px 0px 1px #e9fbb1 inset; -moz-box-shadow:0px 0px 1px #e9fbb1 inset; -webkit-box-shadow:0px 0px 1px #e9fbb1 inset; padding:6px 12px; color:#000; }
+a.button-dialog span, a.button2 span { color:#FFFFFF; font-size:12px; display:inline-block; }
+a.button-dialog:hover, a.button2:hover { background:#ccc; -webkit-transition: all 0.3s ease-in-out; -moz-transition: all 0.3s ease-in-out; -o-transition: all 0.3s ease-in-out; -ms-transition: all 0.3s ease-in-out; transition: all 0.3s ease-in-out; border:#ccc 1px solid; box-shadow:0px 0px 1px #e9fbb1 inset; -moz-box-shadow:0px 0px 1px #e9fbb1 inset; -webkit-box-shadow:0px 0px 1px #e9fbb1 inset; }
+.button-dialog { display:inline-block; background:#ccc; font-size:13px; color:#FFFFFF; padding:4px 12px; text-decoration:none; cursor:pointer; -webkit-transition: all 0.3s ease-in-out; -moz-transition: all 0.3s ease-in-out; -o-transition: all 0.3s ease-in-out; -ms-transition: all 0.3s ease-in-out; transition: all 0.3s ease-in-out; border:#ccc 1px solid; box-shadow:0px 0px 1px #e9fbb1 inset; -moz-box-shadow:0px 0px 1px #e9fbb1 inset; -webkit-box-shadow:0px 0px 1px #e9fbb1 inset; }
+.button:hover { background:#ccc; -webkit-transition: all 0.3s ease-in-out; -moz-transition: all 0.3s ease-in-out; -o-transition: all 0.3s ease-in-out; -ms-transition: all 0.3s ease-in-out; transition: all 0.3s ease-in-out; border:#ccc 1px solid; box-shadow:0px 0px 1px #e9fbb1 inset; -moz-box-shadow:0px 0px 1px #e9fbb1 inset; -webkit-box-shadow:0px 0px 1px #e9fbb1 inset; }
+a.button-dialog1 { display:inline-block; background:url(../images/red/cart-rnd.png) left top no-repeat; text-decoration:none; cursor:pointer; width:51px; height:51px; }
+a.button-dialog1 span { text-indent:-9999px; float:left; }
+a.btn-detail { display:inline-block; background:url(../images/red/cart-detail.png) left top no-repeat; text-decoration:none; cursor:pointer; width:51px; height:51px; }
+a.btn-detail span { text-indent:-9999px; float:left; }
+.button-dialogs { overflow: auto; padding: 6px; margin-bottom: 20px; }
+.button-dialogs .left { float: left; text-align: left; }
+.button-dialogs .right { float: right; text-align: right; }
+.button-dialogs .center { text-align: center; margin-left: auto; margin-right: auto; }
