@@ -156,7 +156,7 @@
                             <div class="span6 well">
                                 <h4>Pelanggan baru</h4>
                                 <small>Anda tidak perlu menjadi member untuk berbelanja. Silakan klik tombol "Lanjut ke data pengiriman" untuk melanjutkan. Untuk mempercepat proses belanja dimasa mendatang plus mendapatkan sejumlah tawaran menarik lainnya, anda dapat mendaftar menjadi member dihalaman pendafaran/registrasi.</small><br><br>
-                                <button type="submit" class="btn btn-warning ">Lihat Produk Lainnya</button> <button type="submit" class="btn btn-info next-button">Lanjut sebagai Guest</button>
+                                <a href="{{URL::to('produk')}}" class="btn btn-warning ">Lihat Produk Lainnya</a> <button type="submit" class="btn btn-info next-button">Lanjut sebagai Guest</button>
                                 <div class="clear"></div>
                             </div>
                         </div>
