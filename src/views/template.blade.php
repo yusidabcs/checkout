@@ -12,14 +12,14 @@
         <!-- end: Mobile Specific -->
         
         <!-- start: CSS -->
-        {{HTML::style('packages/Yusidabcs/checkout/css/bootstrap.min.css')}}    
-        {{HTML::style('packages/Yusidabcs/checkout/css/bootstrap-responsive.min.css')}}
-        {{HTML::style('packages/Yusidabcs/checkout/css/jquery.noty.css')}}
-        {{HTML::style('packages/Yusidabcs/checkout/css/noty_theme_default.css')}}
-        {{HTML::style('packages/Yusidabcs/checkout/css/style.css')}}
-        {{HTML::style('packages/Yusidabcs/checkout/css/style-responsive.css')}}
-        {{HTML::style('packages/Yusidabcs/checkout/css/data-dialog.css')}}
-        {{HTML::style('packages/Yusidabcs/checkout/css/jquery-ui.css')}}
+        {{HTML::style('packages/yusidabcs/checkout/css/bootstrap.min.css')}}    
+        {{HTML::style('packages/yusidabcs/checkout/css/bootstrap-responsive.min.css')}}
+        {{HTML::style('packages/yusidabcs/checkout/css/jquery.noty.css')}}
+        {{HTML::style('packages/yusidabcs/checkout/css/noty_theme_default.css')}}
+        {{HTML::style('packages/yusidabcs/checkout/css/style.css')}}
+        {{HTML::style('packages/yusidabcs/checkout/css/style-responsive.css')}}
+        {{HTML::style('packages/yusidabcs/checkout/css/data-dialog.css')}}
+        {{HTML::style('packages/yusidabcs/checkout/css/jquery-ui.css')}}
         <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&subset=latin,cyrillic-ext,latin-ext' rel='stylesheet' type='text/css'>-->
         
         <!-- end: CSS -->
