@@ -133,31 +133,31 @@
 									<tbody>										
 										<tr>
 											<td>Nama</td>
-											<td>{{if($datapengirim['statuspenerima']==1) ?  $datapengirim['namapenerima'] : $datapengirim['nama']}}</td>
+											<td>{{($datapengirim['statuspenerima']==1) ?  $datapengirim['namapenerima'] : $datapengirim['nama']}}</td>
 										</tr>
 										<tr>
 											<td>Telp / HP</td>
-											<td>{{if($datapengirim['statuspenerima']==1) ? $datapengirim['telppenerima'] : $datapengirim['telp']}}</td>
+											<td>{{($datapengirim['statuspenerima']==1) ? $datapengirim['telppenerima'] : $datapengirim['telp']}}</td>
 										</tr>
 										<tr>
 											<td>Alamat</td>
-											<td>{{if($datapengirim['statuspenerima']==1) ? $datapengirim['alamatpenerima'] : $datapengirim['alamat']}}</td>
+											<td>{{($datapengirim['statuspenerima']==1) ? $datapengirim['alamatpenerima'] : $datapengirim['alamat']}}</td>
 										</tr>
 										<tr>
 											<td>Negara</td>
-											<td>{{if($datapengirim['statuspenerima']==1) ? $datapengirim['negarapenerima'] : $datapengirim['negara']}}</td>
+											<td>{{($datapengirim['statuspenerima']==1) ? $datapengirim['negarapenerima'] : $datapengirim['negara']}}</td>
 										</tr>
 										<tr>
 											<td>Provinsi</td>
-											<td>{{if($datapengirim['statuspenerima']==1) ? $datapengirim['provinsipenerima'] : $datapengirim['provinsi']}}</td>
+											<td>{{($datapengirim['statuspenerima']==1) ? $datapengirim['provinsipenerima'] : $datapengirim['provinsi']}}</td>
 										</tr>
 										<tr>
 											<td>Kota</td>
-											<td>{{if($datapengirim['statuspenerima']==1) ? $datapengirim['kotapenerima'] : $datapengirim['kota']}}</td>
+											<td>{{($datapengirim['statuspenerima']==1) ? $datapengirim['kotapenerima'] : $datapengirim['kota']}}</td>
 										</tr>
 										<tr>
 											<td>Kode Pos</td>
-											<td>{{if($datapengirim['statuspenerima']==1) ? $datapengirim['kodepospenerima'] : $datapengirim['kodepos']}}</td>
+											<td>{{($datapengirim['statuspenerima']==1) ? $datapengirim['kodepospenerima'] : $datapengirim['kodepos']}}</td>
 										</tr>
 									</tbody>
 								</table>
