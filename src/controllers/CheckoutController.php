@@ -91,7 +91,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('pengaturan' ,$pengaturan)
             ->with('statusEkspedisi',$status)
             ->with('ekspedisi',$ekspedisi)
-            ->with('diskon',$diskon);
+            ->with('diskon',$diskon)
+            ->with('kontak', Pengaturan::find(1));
         $this->layout->seo = View::make('checkout::seostuff')
         ->with('title',"Checkout - Rincian Belanja - ".Pengaturan::find(1)->nama)
         ->with('description',Pengaturan::find(1)->deskripsi)
@@ -120,7 +121,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('negara', Negara::lists('nama','id'))
             ->with('provinsi',Provinsi::lists('nama','id'))
             ->with('kota', Kabupaten::lists('nama','id'))
-            ->with('usertemp',(Session::has('pengiriman')?Session::get('pengiriman'):null));
+            ->with('usertemp',(Session::has('pengiriman')?Session::get('pengiriman'):null))
+            ->with('kontak', Pengaturan::find(1));
         $this->layout->seo = View::make('checkout::seostuff')
         ->with('title',"Checkout - Data Pembeli dan Pengiriman - ".Pengaturan::find(1)->nama)
         ->with('description',Pengaturan::find(1)->deskripsi)
@@ -149,7 +151,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('banktrans' ,Bank::all())
             ->with('paypal' , $akun[0])
             ->with('creditcard', $akun[1])
-            ->with('pembayaran',Session::has('pembayaran')? Session::get('pembayaran'):null);
+            ->with('pembayaran',Session::has('pembayaran')? Session::get('pembayaran'):null)
+            ->with('kontak', Pengaturan::find(1));
         $this->layout->seo = View::make('checkout::seostuff')
             ->with('title',"Checkout - Metode Pembayaran - ".Pengaturan::find(1)->nama)
             ->with('description',Pengaturan::find(1)->deskripsi)
@@ -161,7 +164,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             $pembayaran = Input::all();
         }
         if(Session::has('pembayaran')){
-            $pembayaran =Session::has('pembayaran');
+            $pembayaran =Session::get('pembayaran');
         } 
         $datapengirim = Session::get('pengiriman');
         $datapengirim['negara'] = Negara::find($datapengirim['negara'])->nama;
@@ -192,7 +195,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('kodekupon' ,Session::has('diskonId') ? Diskon::find(Session::get('diskonId'))->kode : '')
             ->with('kodeunik', Session::get('kodeunik'))
             ->with('diskon', $potongan)
-            ->with('total', $total);
+            ->with('total', $total)
+            ->with('kontak', Pengaturan::find(1));
         $this->layout->seo = View::make('checkout::seostuff')
             ->with('title',"Checkout - Ringkasan Order - ".Pengaturan::find(1)->nama)
             ->with('description',Pengaturan::find(1)->deskripsi)
@@ -432,7 +436,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('paypal',  $akun[0])
             ->with('creditcard' , $akun[1])
             ->with('pengaturan', Pengaturan::all()->first())
-            ->with('paypalbutton', $paypalbutton);
+            ->with('paypalbutton', $paypalbutton)
+            ->with('kontak', Pengaturan::find(1));
 
             $this->layout->seo = View::make('checkout::seostuff')
             ->with('title',"Checkout - Finish - ".Pengaturan::find(1)->nama)

@@ -12,14 +12,14 @@
         <!-- end: Mobile Specific -->
         
         <!-- start: CSS -->
-        {{HTML::style('packages/yusidabcs/checkout/css/bootstrap.min.css')}}    
-        {{HTML::style('packages/yusidabcs/checkout/css/bootstrap-responsive.min.css')}}
-        {{HTML::style('packages/yusidabcs/checkout/css/jquery.noty.css')}}
-        {{HTML::style('packages/yusidabcs/checkout/css/noty_theme_default.css')}}
-        {{HTML::style('packages/yusidabcs/checkout/css/style.css')}}
-        {{HTML::style('packages/yusidabcs/checkout/css/style-responsive.css')}}
-        {{HTML::style('packages/yusidabcs/checkout/css/data-dialog.css')}}
-        {{HTML::style('packages/yusidabcs/checkout/css/jquery-ui.css')}}
+        {{HTML::style('packages/Yusidabcs/checkout/css/bootstrap.min.css')}}    
+        {{HTML::style('packages/Yusidabcs/checkout/css/bootstrap-responsive.min.css')}}
+        {{HTML::style('packages/Yusidabcs/checkout/css/jquery.noty.css')}}
+        {{HTML::style('packages/Yusidabcs/checkout/css/noty_theme_default.css')}}
+        {{HTML::style('packages/Yusidabcs/checkout/css/style.css')}}
+        {{HTML::style('packages/Yusidabcs/checkout/css/style-responsive.css')}}
+        {{HTML::style('packages/Yusidabcs/checkout/css/data-dialog.css')}}
+        {{HTML::style('packages/Yusidabcs/checkout/css/jquery-ui.css')}}
         <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&subset=latin,cyrillic-ext,latin-ext' rel='stylesheet' type='text/css'>-->
         
         <!-- end: CSS -->
@@ -107,7 +107,7 @@
                 <div class="navbar-inner">
                     <div class="container-fluid container-narrow">
                         <!-- start: Header Menu -->
-                        <a class="brand" href="{{URL::to('')}}"><span>{{$kontak->nama}}</span></a>
+                        <a class="brand" href="#"><span>{{$kontak->nama}}</span></a>
                         <div class="nav-no-collapse header-nav">
                             <ul class="nav pull-right">
                                 <li><a class="btn" href="{{URL::to('')}}">
@@ -127,8 +127,9 @@
             </div>
             <br>
             <div class="container container-narrow">
+
                 <div class="row-fluid">
-                        <div id="content" class="span12">
+                        <div id="content" class="span12">                            
                             <div class="box span12">
                                 <div class="">                                    
                                     @yield('content')                                         
@@ -139,7 +140,8 @@
                         </div><!--/row-->
 
                     <div class="clearfix"></div>
-                    <small>Copyright 2013 by {{$kontak->nama}}</small>
+                    <br>
+                    <small>Copyright 2013 by {{$kontak->nama}} Powered by <a href="http://jarvis-store.com">Jarvis Store</a></small>
                     <br><br>     
                 </div><!--/.fluid-container-->
             </div>

@@ -1,5 +1,10 @@
 @section('content')
 <div id="demos">
+    <div class="row-fluid">
+        <div class="span6"><img src="{{URL::to(getPrefixDomain().'/galeri/'.$kontak->logo)}}" /></div>
+        <div class="span6"></div>
+    </div>
+    <hr>
     <h2>Checkout - Data Pembeli dan Pengiriman</h2>
     <br>
     <div id="psteps_horiz_layout" class="pf-form">
