@@ -1,10 +1,5 @@
 @section('content')
 <div id="demos">
-	<div class="row-fluid">
-        <div class="span6"><img src="{{URL::to(getPrefixDomain().'/galeri/'.$kontak->logo)}}" /></div>
-        <div class="span6"></div>
-    </div>
-    <hr>
 	<h2>Finish - Konfirmasi Order</h2>
 	<br>
 	<div id="psteps_horiz_layout" class="pf-form">
@@ -44,13 +39,11 @@
 									@foreach($banktrans as $key =>$banktran)
 									<tr>
 										<td >
-											@if($banktran->bankDefaultId=='1')
-												<img src="{{URL::to('img/bank/bri.png')}}" style="width:75px; height 75px;">
-											@elseif($banktran->bankDefaultId=='2')
-												<img src="{{URL::to('img/bank/bca.png')}}" width="80">
-											@elseif($banktran->bankDefaultId=='3')
-												<img src="{{URL::to('img/bank/mandiri.png')}}" width="80">
-											@endif
+											@foreach($banks as $key => $logoBank)
+												@if($banktran->bankDefaultId==$logoBank->id)
+													<img src="{{URL::to('img/'.$logoBank->logo)}}" style="max-width: none;">
+												@endif
+											@endforeach
 										</td>
 										<td width='90%'><h4>{{ $banktran->bankdefault->nama}} : {{$banktran->noRekening}}</h4> A/n {{$banktran->atasNama}}</td>
 									</tr>

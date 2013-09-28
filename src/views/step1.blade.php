@@ -1,10 +1,5 @@
 @section('content')
 <div id="demos">
-    <div class="row-fluid">
-        <div class="span3"><img src="{{URL::to(getPrefixDomain().'/galeri/'.$kontak->logo)}}" /></div>
-        <div class="span9"></div>
-    </div>
-    <hr>
     <h2>Checkout - Rincian Belanja</h2>
     <br>
     <div id="psteps_horiz_layout" class="pf-form">
@@ -25,18 +20,18 @@
                     <table class="table table-bordered table-striped table-condensed">
                         <thead>
                             <tr>
-                                <th>Gambar</th>
-                                <th>Nama Produk</th>
+                                <th class="hidden-phone">Gambar</th>
+                                <th>Produk</th>
                                 <th>Qty</th>
                                 <th>Harga</th>
                                 <th>Total</th> 
-                                <th></th>                                          
+                                <th width="10"></th>                                          
                             </tr>
                         </thead>   
                         <tbody>
                             @foreach ($cart->contents() as $key => $item) 
                             <tr id="cart{{$item['rowid']}}">
-                                <td><div class="cart-img pull-left">{{HTML::image(getPrefixDomain().'/produk/thumb/'.$item['image'],'',array('width'=>'75px','height'=>'75px'))}}</div></td>
+                                <td class="hidden-phone"><div class="cart-img pull-left">{{HTML::image(getPrefixDomain().'/produk/thumb/'.$item['image'],'',array('width'=>'75px','height'=>'75px'))}}</div></td>
                                 <td class="center">
                                     <a href="#"><h5>{{$item['name']}}</h5></a>
                                     <!-- Check if this cart item has options. -->
@@ -50,16 +45,17 @@
                                     </small>
                                     @endif
                                 </td>
-                                <td><input type="number" class="span3 cartqty" placeholder="Qty" value="{{$item['qty']}}" name='{{ $item['rowid'] }}' min="1"></td>
+                                <td><input style="width: 60px;" type="number" class="span3 cartqty" placeholder="Qty" value="{{$item['qty']}}" name='{{ $item['rowid'] }}' min="1"></td>
                                 <td>{{ jadiRupiah($item['price'])}}</strong></td> 
                                 <td>
                                     <span class="{{ $item['rowid'] }}"><strong>{{ jadiRupiah($item['price'] * $item['qty'])}}</strong></span>
                                 </td>
-                                <td><a onclick="deletecart({{ "'".$item['rowid']."'" }})" href="javascript:void(0);" ><i class="halflings-icon trash halflings-icon"></i></a></td>                                     
+                                <td><a onclick="deletecart({{ "'".$item['rowid']."'" }})" href="javascript:void(0);"><i class="halflings-icon trash halflings-icon"></i></a></td>                                     
                             </tr>
                             @endforeach                                                            
                             <tr>
-                                <td colspan="3" ></td>
+                                <td colspan="2" ></td>
+                                <td class="hidden-phone" colspan="1" ></td>
                                 <td class="center">
                                     Subtotal
                                 </td> 
@@ -75,7 +71,7 @@
                                         <h4>Biaya Pegiriman</h4>
                                         <small>Masukkan kota tujuan anda untuk menghitung biaya pengiriman</small><br><br>
                                         <div class="form-horizontal">
-                                            <input type="text" class="input" id='tujuan' placeholder="Kota tujuan pengiriman..." value="{{$ekspedisi!=null?$ekspedisi['tujuan']:''}}">
+                                            <input style="width: 50%;" type="text" class="input" id='tujuan' placeholder="Kota tujuan pengiriman..." value="{{$ekspedisi!=null?$ekspedisi['tujuan']:''}}">
                                             <button type="button" class="btn" id='ekspedisibtn'>Cari</button>
                                         </div>
                                         <br>
@@ -95,7 +91,7 @@
                                         <h4>Kode Diskon</h4>
                                         <small>Gunakan kode kupon pada kolom dibawah jika ada</small><br><br>
                                         <div class="form-horizontal">
-                                            <input type="text" class="input" placeholder="Kode kupon..." name='kodeplace' id='kuponplace' value="{{$diskon!=null? $diskon['diskonId']->kode:''}}" {{$diskon!=null? 'disabled':''}}>
+                                            <input style="width: 50%;" type="text" class="input" placeholder="Kode kupon..." name='kodeplace' id='kuponplace' value="{{$diskon!=null? $diskon['diskonId']->kode:''}}" {{$diskon!=null? 'disabled':''}}>
                                             <button type="submit" class="btn" id='kuponbtn'>{{$diskon!=null? 'Cancel':'Pakai Kupon'}}</button>
                                             {{$diskon!=null? '<input type="hidden" id="diskonstatus" value="1">':''}}
                                             
@@ -106,21 +102,24 @@
                                 <td colspan="2"><span id='kupontext'>{{$diskon!=null?jadiRupiah($diskon['besarPotongan']):jadiRupiah(0)}}</span></td>                             
                             </tr> 
                             <tr>
-                                <td colspan="3"></td>
+                                <td colspan="2" ></td>
+                                <td class="hidden-phone" colspan="1" ></td>
                                 <td class="center">
                                     Pajak
                                 </td> 
                                 <td colspan="2"><span id='pajaktext'>{{Pajak::all()->first()->status==0? '<em>pajak non-aktif</em>' : Pajak::all()->first()->pajak.'%'}}</td>                            
                             </tr> 
                             <tr>
-                                <td colspan="3"></td>
+                                <td colspan="2" ></td>
+                                <td class="hidden-phone" colspan="1" ></td>
                                 <td class="center">
                                     Kode Unik
                                 </td> 
                                 <td colspan="2"><span id='kodeuniktext'>{{jadiRupiah($kodeunik)}}</td>                            
                             </tr> 
                             <tr class="success">
-                                <td colspan="3"></td>
+                                <td colspan="2" ></td>
+                                <td class="hidden-phone" colspan="1" ></td>
                                 <td class="center">
                                     <h3>Total</h3>
                                 </td> 
@@ -154,10 +153,12 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="span6 well">
+                            <div class="span6 well" style="height:287px">
                                 <h4>Pelanggan baru</h4>
                                 <small>Anda tidak perlu menjadi member untuk berbelanja. Silakan klik tombol "Lanjut ke data pengiriman" untuk melanjutkan. Untuk mempercepat proses belanja dimasa mendatang plus mendapatkan sejumlah tawaran menarik lainnya, anda dapat mendaftar menjadi member dihalaman pendafaran/registrasi.</small><br><br>
-                                <a href="{{URL::to('produk')}}" class="btn btn-warning ">Lihat Produk Lainnya</a> <button type="submit" class="btn btn-info next-button">Lanjut sebagai Guest</button>
+                                <a href="{{URL::to('produk')}}" class="btn btn-warning hidden-phone">Lihat Produk Lainnya</a>
+                                <a href="{{URL::to('produk')}}" class="btn btn-warning hidden-desktop" style="float: left;">Back</a>
+                                <button type="submit" class="btn btn-info next-button">Lanjut sebagai Guest</button>
                                 <div class="clear"></div>
                             </div>
                         </div>

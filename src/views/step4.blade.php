@@ -1,10 +1,5 @@
 @section('content')
 <div id="demos">
-	<div class="row-fluid">
-        <div class="span6"><img src="{{URL::to(getPrefixDomain().'/galeri/'.$kontak->logo)}}" /></div>
-        <div class="span6"></div>
-    </div>
-    <hr>
 	<h2>Checkout - Ringkasan Order</h2>
 	<br>
 	<div id="psteps_horiz_layout" class="pf-form">
@@ -188,8 +183,9 @@
 					<hr>
 					<div style="clear:both;"></div>
 					{{Form::open(array('url'=>'finish','method'=>'post','name'=>'finish'))}}
-					<button type="submit" class="next-button btn btn-info"> Selesaikan Pemesanan <i class="icon-check"></i></button>
-					<a href="{{URL::to('pembayaran')}}" class="back-button btn btn-warning"><i class="icon-arrow-left"></i> Kembali</a>
+					
+					<button style="margin-top: 8%;" type="submit" class="next-button btn btn-info"> Selesaikan Pemesanan</button>
+					<a style="margin-top: 8%;" href="{{URL::to('pembayaran')}}" class="back-button btn btn-warning"><i class="icon-arrow-left"></i> Kembali</a>
 					{{Form::close()}}
 
 				</div>
