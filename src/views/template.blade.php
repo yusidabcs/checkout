@@ -20,11 +20,8 @@
         {{HTML::style('packages/yusidabcs/checkout/css/style-responsive.css')}}
         {{HTML::style('packages/yusidabcs/checkout/css/data-dialog.css')}}
         {{HTML::style('packages/yusidabcs/checkout/css/jquery-ui.css')}}
-<<<<<<< HEAD
         <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&subset=latin,cyrillic-ext,latin-ext' rel='stylesheet' type='text/css'>
-=======
-        <!--<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&subset=latin,cyrillic-ext,latin-ext' rel='stylesheet' type='text/css'>-->
->>>>>>> b28649cb0dba94d653769e3d765cea197daa9fa2
+
         
         <!-- end: CSS -->
         
