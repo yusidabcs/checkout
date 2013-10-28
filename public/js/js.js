@@ -185,7 +185,7 @@ $(document).ready(function(){
                         type: 'post',
                         data: {produkId:produkId,namaopsi:namaopsi,opsi:opsi,qty:qty}
                     }).done(function(data){
-                        //alert(data);
+                        alert(data);
                         if(data=='stok'){
                             noty({"text":'Maaf, Stok tidak mencukupi.',"layout":"center","type":'error','speed': 100});
                             $( "#cart_dialog" ).dialog('close');        
@@ -445,7 +445,7 @@ $(document).ready(function(){
         });
 
     //js checked radio
-    $('body').on('click','input[name="ekspedisilist"]',function(){
+    $('body').on('click','input[name="ekspedisilist"]',function(e){
         tujuan = $('#tujuan').val();
         var total = $('#subtotalcart').html();
         format = total.replace(/[0-9]/g, '');
@@ -462,6 +462,15 @@ $(document).ready(function(){
         }).done(function(data){
             $('#statusEkspedisi').val(1);
             $('#ekspedisilist').val(value);
+        }).done(function(){
+            if (e.originalEvent === undefined){                
+            }else{
+               pos =  $('#ekspedisitext').position();
+               alert (pos.top);
+               $('html, body').animate({
+                scrollTop: pos.top
+                }, 500);
+            }
         });
     });
 

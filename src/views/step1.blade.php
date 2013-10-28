@@ -6,10 +6,10 @@
         <div class="row-fluid">
             <div class="span12">
                 <div class="step-title btn btn-success"><span class="step-order">1.</span> <span class="step-name">Rincian Belanja</span></div>
-                <div class="step-title btn disabled "><span class="step-order">2.</span> <span class="step-name">Data Pembeli Dan Pengiriman</span></div>
-                <div class="step-title btn disabled "><span class="step-order">3.</span> <span class="step-name">Metode Pembayaran</span></div>
-                <div class="step-title btn disabled "><span class="step-order">4.</span> <span class="step-name">Ringkasan Order</span></div>
-                <div class="step-title btn disabled "><span class="step-order">5.</span> <span class="step-name">Selesai</span></div>
+                <div class="step-title btn disabled "><span class="step-order">2.</span> <span class="step-name hidden-phone">Data Pembeli Dan Pengiriman</span></div>
+                <div class="step-title btn disabled "><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
+                <div class="step-title btn disabled "><span class="step-order">4.</span> <span class="step-name hidden-phone">Ringkasan Order</span></div>
+                <div class="step-title btn disabled "><span class="step-order">5.</span> <span class="step-name hidden-phone">Selesai</span></div>
             </div>
         </div>
         <div class="row-fluid box">
@@ -54,16 +54,59 @@
                             </tr>
                             @endforeach                                                            
                             <tr>
-                                <td colspan="2" ></td>
-                                <td class="hidden-phone" colspan="1" ></td>
+                                <td colspan="2"></td>
+                                <td class="hidden-phone"></td>
                                 <td class="center">
                                     Subtotal
                                 </td> 
                                 <td colspan="2"><span class="price" id='subtotalcart'>{{jadiRupiah(Shpcart::cart()->total())}}</span></td>                             
+                            </tr>
+                            <tr>
+                                <td colspan="2" ></td>
+                                <td class="hidden-phone"></td>
+                                <td class="center">
+                                    Ongkos Kirim
+                                </td> 
+                                <td colspan="2"><span id='ekspedisitext'>{{$pengaturan->statusEkspedisi==2 ?'<strong>Free Shipping</strong>' : ($pengaturan->statusEkspedisi==3?'Pengiriman Menyusul':jadiRupiah($ekspedisi!=null?$ekspedisi['tarif']:0))}}</span></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" ></td>
+                                <td class="hidden-phone"></td>
+                                <td class="center">
+                                    Potongan/diskon
+                                </td> 
+                                <td colspan="2"><span id='kupontext'>{{$diskon!=null?jadiRupiah($diskon['besarPotongan']):jadiRupiah(0)}}</span></td>               
+                            </tr>    
+                             <tr>
+                                <td colspan="2"></td>
+                                <td class="hidden-phone"></td>
+                                <td class="center">
+                                    Pajak
+                                </td> 
+                                <td colspan="2"><span id='pajaktext'>{{Pajak::all()->first()->status==0? '<span class="label label-success">non-aktif</span>' : Pajak::all()->first()->pajak.'%'}}</td>                            
                             </tr> 
                             <tr>
-                                <td colspan="4">
-                                    <div class="well">
+                                <td colspan="2"></td>
+                                <td class="hidden-phone"></td>
+                                <td>
+                                    Kode Unik
+                                </td> 
+                                <td colspan="2"><span id='kodeuniktext'>{{jadiRupiah($kodeunik)}}</td>                            
+                            </tr> 
+                            <tr class="success">
+                                <td colspan="2"></td>
+                                <td class="hidden-phone"></td>
+                                <td class="center">
+                                    <h3>Total</h3>
+                                </td> 
+                                <td colspan="2"><h3><span id='totalcart'>
+                                    {{jadiRupiah(Shpcart::cart()->total())}}</span></h3></td>                            
+                                </tr>                                                         
+                        </tbody>
+                    </table> 
+                     <div class="row-fluid">
+                            <div class="span6">
+                                <div class="well">
                                         <input type="hidden" id="statusPengiriman" value="{{$pengaturan->statusEkspedisi}}">
                                         <input type="hidden" id="statusEkspedisi" value="{{$statusEkspedisi}}">
                                         <input type="hidden" id="ekspedisilist" value="{{$ekspedisi!=null? $ekspedisi['ekspedisi'].';'.$ekspedisi['tarif']:''}}">
@@ -82,12 +125,9 @@
                                         @endif                                          
 
                                     </div>
-                                </td>
-                                <td colspan="2"><span id='ekspedisitext'>{{$pengaturan->statusEkspedisi==2 ?'<strong>Free Shipping</strong>' : ($pengaturan->statusEkspedisi==3?'Pengiriman Menyusul':jadiRupiah($ekspedisi!=null?$ekspedisi['tarif']:0))}}</span></td>                             
-                            </tr> 
-                            <tr>
-                                <td colspan="4">
-                                    <div class="well">
+                            </div>
+                            <div class="span6">
+                                <div class="well">
                                         <h4>Kode Diskon</h4>
                                         <small>Gunakan kode kupon pada kolom dibawah jika ada</small><br><br>
                                         <div class="form-horizontal">
@@ -98,35 +138,18 @@
                                         </div>
 
                                     </div>
+                            </div>
+                        </div>
+                        <table>
+                            <tr>
+                                <td>
+                                    
                                 </td>
-                                <td colspan="2"><span id='kupontext'>{{$diskon!=null?jadiRupiah($diskon['besarPotongan']):jadiRupiah(0)}}</span></td>                             
+                                <td>
+                                    
+                                </td>
+                                                         
                             </tr> 
-                            <tr>
-                                <td colspan="2" ></td>
-                                <td class="hidden-phone" colspan="1" ></td>
-                                <td class="center">
-                                    Pajak
-                                </td> 
-                                <td colspan="2"><span id='pajaktext'>{{Pajak::all()->first()->status==0? '<em>pajak non-aktif</em>' : Pajak::all()->first()->pajak.'%'}}</td>                            
-                            </tr> 
-                            <tr>
-                                <td colspan="2" ></td>
-                                <td class="hidden-phone" colspan="1" ></td>
-                                <td class="center">
-                                    Kode Unik
-                                </td> 
-                                <td colspan="2"><span id='kodeuniktext'>{{jadiRupiah($kodeunik)}}</td>                            
-                            </tr> 
-                            <tr class="success">
-                                <td colspan="2" ></td>
-                                <td class="hidden-phone" colspan="1" ></td>
-                                <td class="center">
-                                    <h3>Total</h3>
-                                </td> 
-                                <td colspan="2"><h3><span id='totalcart'>
-                                    {{jadiRupiah(Shpcart::cart()->total())}}</span></h3></td>                            
-                                </tr>                              
-                            </tbody>
                         </table>
                         {{Form::close()}}
                         @if ( !Sentry::check())

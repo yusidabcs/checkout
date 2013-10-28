@@ -5,10 +5,10 @@
 	<div id="psteps_horiz_layout" class="pf-form">
 		<div class="row-fluid">
 			<div class="span12">
-				<div class="step-title btn disabled"><span class="step-order">1.</span> <span class="step-name">Rincian Belanja</span></div>
-				<div class="step-title btn disabled"><span class="step-order">2.</span> <span class="step-name">Data Pembeli Dan Pengiriman</span></div>
-				<div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name">Metode Pembayaran</span></div>
-				<div class="step-title btn disabled"><span class="step-order">4.</span> <span class="step-name">Ringkasan Order</span></div>
+				<div class="step-title btn disabled"><span class="step-order">1.</span> <span class="step-name hidden-phone">Rincian Belanja</span></div>
+				<div class="step-title btn disabled"><span class="step-order">2.</span> <span class="step-name hidden-phone">Data Pembeli Dan Pengiriman</span></div>
+				<div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
+				<div class="step-title btn disabled"><span class="step-order">4.</span> <span class="step-name hidden-phone">Ringkasan Order</span></div>
 				<div class="step-title btn btn-success"><span class="step-order">5.</span> <span class="step-name">Selesai</span></div>
 			</div>
 		</div>

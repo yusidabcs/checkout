@@ -1,5 +1,6 @@
 <?php namespace Yusidabcs\Checkout;
 use Pengaturan;
+use Session;
 use Illuminate\Support\Facades\View;
 class BaseController extends \Illuminate\Routing\Controllers\Controller {
 
@@ -9,15 +10,19 @@ class BaseController extends \Illuminate\Routing\Controllers\Controller {
 	 * @return void
 	 */
 	public $layout = 'checkout::template';
+	public $setting;
+	public $akunId;
 	protected function setupLayout()
-	{
+	{		
+		$this->akunId =Session::get('akunid');
+		$this->setting = Pengaturan::where('akunId','=',$this->akunId)->first();
 		if ( ! is_null($this->layout))
 		{
-            $ga = Pengaturan::find('1')->gAnalytics;
+            $ga = $this->setting->gAnalytics;
 
 			$this->layout = View::make($this->layout)
 				->with('analytic',$ga)
-                ->with('kontak', Pengaturan::find(1));
+                ->with('kontak', $this->setting);
 		}
 	}
 

@@ -60,7 +60,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             Session::forget('ongkosKirim');
         }
         $kode = rand(100,200);
-        $pengaturan = Pengaturan::all()->first();
+        $pengaturan = $this->setting;
         if($pengaturan->statusEkspedisi!=1){
             if($pengaturan->statusEkspedisi==2)
                 Session::set('ekspedisiId',"Free Shipping");
@@ -68,8 +68,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 Session::set('ekspedisiId',"Pengiriman Menyusul");
             Session::set('ongkosKirim',0);
         }
-        $eks = New ShopCartController;
-        $data = $eks->checkekspedisi('surabaya');
+        //$eks = New ShopCartController;
+        //$data = $eks->checkekspedisi('surabaya');
         $selected = Session::get('ekspedisiId').';'.Session::get('ongkosKirim');
 
         if(Session::has('ekspedisiId')){
@@ -86,17 +86,17 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         }
         Session::put('kodeunik',$kode);
         $this->layout->content = View::make('checkout::step1')->with('cart' ,Shpcart::cart())
-            ->with('provinsi' ,Provinsi::where('negaraId','=',Pengaturan::all()->first()->negara)->get())
+            ->with('provinsi' ,Provinsi::where('negaraId','=',$this->setting->negara)->get())
             ->with('kodeunik',$kode)
             ->with('pengaturan' ,$pengaturan)
             ->with('statusEkspedisi',$status)
             ->with('ekspedisi',$ekspedisi)
             ->with('diskon',$diskon)
-            ->with('kontak', Pengaturan::find(1));
+            ->with('kontak', $this->setting);
         $this->layout->seo = View::make('checkout::seostuff')
-        ->with('title',"Checkout - Rincian Belanja - ".Pengaturan::find(1)->nama)
-        ->with('description',Pengaturan::find(1)->deskripsi)
-        ->with('keywords',Pengaturan::find(1)->keyword);
+        ->with('title',"Checkout - Rincian Belanja - ".$this->setting->nama)
+        ->with('description',$this->setting->deskripsi)
+        ->with('keywords',$this->setting->keyword);
     }
      function pengiriman(){
         //check session cart dan ekspedisi dan diskon                
@@ -104,7 +104,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             return Redirect::to('checkout');
         }
        //check ekspedisi
-        if(Pengaturan::all()->first()->statusEkspedisi==1){
+        if($this->setting->statusEkspedisi==1){
             if(!Session::has('ekspedisiId')){
                  return Redirect::to('checkout');
             }
@@ -116,47 +116,42 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         }       
 
         $this->layout->content = View::make('checkout::step2')->with('cart' ,Shpcart::cart())
-            ->with('provinsi' ,Provinsi::where('negaraId','=',Pengaturan::all()->first()->negara)->get())
+            ->with('provinsi' ,Provinsi::where('negaraId','=',$this->setting->negara)->get())
             ->with('user',(Sentry::check() ? (Session::has('pengiriman') ? null:Sentry::getUser()):null))
             ->with('negara', Negara::lists('nama','id'))
             ->with('provinsi',Provinsi::lists('nama','id'))
             ->with('kota', Kabupaten::lists('nama','id'))
             ->with('usertemp',(Session::has('pengiriman')?Session::get('pengiriman'):null))
-            ->with('kontak', Pengaturan::find(1));
+            ->with('kontak', $this->setting);
         $this->layout->seo = View::make('checkout::seostuff')
-        ->with('title',"Checkout - Data Pembeli dan Pengiriman - ".Pengaturan::find(1)->nama)
-        ->with('description',Pengaturan::find(1)->deskripsi)
-        ->with('keywords',Pengaturan::find(1)->keyword);
+        ->with('title',"Checkout - Data Pembeli dan Pengiriman - ".$this->setting->nama)
+        ->with('description',$this->setting->deskripsi)
+        ->with('keywords',$this->setting->keyword);
     }
     function pembayaran(){
         if ( ! Sentry::check()){
             
-            $user = Pelanggan::where('email','=',Input::get('email'))->where('tipe','=', '1');
+            $user = Pelanggan::where('email','=',Input::get('email'))->whereIn('tipe', array(1,2))->where('akunId','=',$this->akunId)->get();
             if($user->count()>0){
                 return Redirect::to('pengiriman')->withInput()->with('message','error')->with('text','Alamat email sudah digunakan. Coba yang lain atau silakan login.');
-            }else{
-                $user2 = Pelanggan::where('email','=',Input::get('email'))->where('tipe','=', '2');
-                if($user2->count()>0){
-                    return Redirect::to('pengiriman')->withInput()->with('message','error')->with('text','Alamat email sudah digunakan. Coba yang lain atau silakan login.');
-                }
             }            
         }
         if(Request::server('REQUEST_METHOD')=='POST'){
             Session::put('pengiriman', Input::all());               
         }        
-        $akun = OnlineAkun::all();      
+        $akun = OnlineAkun::where('akunId','=',$this->akunId)->get();      
         $this->layout->content = View::make('checkout::step3')->with('cart' ,Shpcart::cart())
             ->with('banks',BankDefault::all())
             ->with('user',(Sentry::check() ? Sentry::getUser():''))
-            ->with('banktrans' ,Bank::all())
+            ->with('banktrans' ,Bank::where('akunId','=',$this->akunId)->get())
             ->with('paypal' , $akun[0])
             ->with('creditcard', $akun[1])
             ->with('pembayaran',Session::has('pembayaran')? Session::get('pembayaran'):null)
-            ->with('kontak', Pengaturan::find(1));
+            ->with('kontak', $this->setting);
         $this->layout->seo = View::make('checkout::seostuff')
-            ->with('title',"Checkout - Metode Pembayaran - ".Pengaturan::find(1)->nama)
-            ->with('description',Pengaturan::find(1)->deskripsi)
-            ->with('keywords',Pengaturan::find(1)->keyword);
+            ->with('title',"Checkout - Metode Pembayaran - ".$this->setting->nama)
+            ->with('description',$this->setting->deskripsi)
+            ->with('keywords',$this->setting->keyword);
     }
     function konfirmasi(){
         if(Request::server('REQUEST_METHOD')=='POST'){
@@ -175,7 +170,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             $datapengirim['provinsipenerima'] = Provinsi::find($datapengirim['provinsipenerima'])->nama;
             $datapengirim['kotapenerima'] = Kabupaten::find($datapengirim['kotapenerima'])->nama;
         }
-        $akun = OnlineAkun::all();
+        $akun = OnlineAkun::where('akunId','=',$this->akunId)->get();
         $potongan = 0;
         
         if(!is_null(Session::get('diskonId'))){
@@ -186,7 +181,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             }
         }
         $total = (Shpcart::cart()->total() + Session::get('ongkosKirim')- $potongan);        
-        $total = $total + (Pajak::all()->first()->status==0 ? 0 : $total * Pajak::all()->first()->pajak / 100) + Session::get('kodeunik');        
+        $total = $total + (Pajak::where('akunId','=',$this->akunId)->first()->status==0 ? 0 : $total * Pajak::where('akunId','=',$this->akunId)->first()->pajak / 100) + Session::get('kodeunik');        
         
         $this->layout->content = View::make('checkout::step4')->with('cart' ,Shpcart::cart())
             ->with('datapengirim',$datapengirim)
@@ -196,17 +191,17 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('kodeunik', Session::get('kodeunik'))
             ->with('diskon', $potongan)
             ->with('total', $total)
-            ->with('kontak', Pengaturan::find(1));
+            ->with('kontak', $this->setting);
         $this->layout->seo = View::make('checkout::seostuff')
-            ->with('title',"Checkout - Ringkasan Order - ".Pengaturan::find(1)->nama)
-            ->with('description',Pengaturan::find(1)->deskripsi)
-            ->with('keywords',Pengaturan::find(1)->keyword);
+            ->with('title',"Checkout - Ringkasan Order - ".$this->setting->nama)
+            ->with('description',$this->setting->deskripsi)
+            ->with('keywords',$this->setting->keyword);
     }
     public function finish(){
         if(Shpcart::cart()->total()==0){
             return Redirect::to('checkout');
         }
-        $pengaturan = Pengaturan::all()->first();            
+        $pengaturan = $this->setting;            
         //Generate kd Order
         $awal = date('ymd');
         $next_id ='';
@@ -248,7 +243,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 'tags' => '',
                 'tipe' => 0,
                 'tanggalMasuk' => date("Y-m-d"),
-                'activated' => 1
+                'activated' => 1,
+                'akunId' => $this->akunId
             );
 
             $user = Sentry::getUserProvider()->create($data);
@@ -287,7 +283,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             }
         }
         $total = (Shpcart::cart()->total() + Session::get('ongkosKirim')- $potongan) + Session::get('kodeunik');
-        $total = $total + (Pajak::all()->first()->status==0 ? 0 : $total * Pajak::all()->first()->pajak / 100);
+        $total = $total + (Pajak::where('akunId','=',$this->akunId)->first()->status==0 ? 0 : $total * Pajak::where('akunId','=',$this->akunId)->pajak / 100);
 
         //save order
         $order = new Order;
@@ -323,7 +319,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         
         $order->jenisPembayaran = $pembayaran;
         $order->diskonId = Session::has('diskonId') ? Session::get('diskonId') : '';
-        
+        $order->akunId = $this->akunId;
         $order->save();
         if($order){
             //tambah det order
@@ -360,7 +356,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             $template = Templateemail::find(1);
             $data = array(
                 'pelanggan'=> $order->nama,
-                'toko' => Pengaturan::find('1')->nama,
+                'toko' => $this->setting->nama,
                 'kodeorder' => $order->kodeOrder,
                 'tanggal' => $order->tanggalOrder,
                 'cart' => $cart,
@@ -382,7 +378,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             });
 
 
-            $akun = OnlineAkun::all();
+            $akun = OnlineAkun::where('akunId','=',$this->akunId)->get();
             $paypalbutton = "";
             if($order->jenisPembayaran==2){
                 //buat button paypal.
@@ -405,8 +401,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 $item->set('item_name', 'Payment for order : #'.$order->kodeOrder);
                 $item->set('item_number', '1');
                 $total = $order->total;
-                if(Pengaturan::find(1)->mataUang == 1){
-                    $total =round($order->total / Currencies::find(1)->rate); 
+                if($this->setting->mataUang == 1){
+                    $total =round($order->total / Currencies::where('akunId','=',$this->akunId)->first()->rate); 
                 }
                 $item->set('amount', $total);
                 $item->set('quantity', 1);
@@ -432,17 +428,17 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('datapembayaran', $pembayaran)
             ->with('order', $order)
             ->with('banks' ,BankDefault::all())
-            ->with('banktrans', Bank::all())
+            ->with('banktrans', Bank::where('akunId','=',$this->akunId))
             ->with('paypal',  $akun[0])
             ->with('creditcard' , $akun[1])
-            ->with('pengaturan', Pengaturan::all()->first())
+            ->with('pengaturan', $this->setting)
             ->with('paypalbutton', $paypalbutton)
-            ->with('kontak', Pengaturan::find(1));
+            ->with('kontak', $this->setting);
 
             $this->layout->seo = View::make('checkout::seostuff')
-            ->with('title',"Checkout - Finish - ".Pengaturan::find(1)->nama)
-            ->with('description',Pengaturan::find(1)->deskripsi)
-            ->with('keywords',Pengaturan::find(1)->keyword);
+            ->with('title',"Checkout - Finish - ".$this->setting->nama)
+            ->with('description',$this->setting->deskripsi)
+            ->with('keywords',$this->setting->keyword);
         }
 
     }

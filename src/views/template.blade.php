@@ -109,10 +109,12 @@
                     <div class="container-fluid container-narrow">
                         <!-- start: Header Menu -->
                         <a class="brand hidden-phone" href="{{URL::to('')}}"><span>{{$kontak->nama}}</span></a>
-                        <a style="text-align: center; width:100%" class="brand hidden-desktop" href="{{URL::to('')}}"><span>{{$kontak->nama}}</span></a>
                         <div class="nav-no-collapse header-nav">
                             <ul class="nav pull-right">
-                                
+                                <li class="visible-phone"><a class="btn" href="{{URL::to('')}}">
+                                    <a class="btn" href="#"><i class="icon-home"></i></a>&nbsp;&nbsp;&nbsp;
+                                </a></li> 
+                                 
                                 @if (Sentry::check())
                                     <li ><a class="btn" href="{{URL::to('member')}}">
                                         Halo, {{Sentry::getUser()->nama}}
@@ -123,7 +125,8 @@
                                 </a></li>
                                 <li><a class="btn" href="{{URL::to('')}}">
                                     Lanjut Belanja &rarr;
-                                </a></li>                                             
+                                </a></li> 
+
                             </ul>
                         </div>
                         <!-- end: Header Menu -->

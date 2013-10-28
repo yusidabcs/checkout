@@ -5,11 +5,11 @@
 	<div id="psteps_horiz_layout" class="pf-form">
 		<div class="row-fluid">
 			<div class="span12">
-				<div class="step-title btn disabled"><span class="step-order">1.</span> <span class="step-name">Rincian Belanja</span></div>
-				<div class="step-title btn disabled"><span class="step-order">2.</span> <span class="step-name">Data Pembeli Dan Pengiriman</span></div>
-				<div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name">Metode Pembayaran</span></div>
+				<div class="step-title btn disabled"><span class="step-order">1.</span> <span class="step-name hidden-phone">Rincian Belanja</span></div>
+				<div class="step-title btn disabled"><span class="step-order">2.</span> <span class="step-name hidden-phone">Data Pembeli Dan Pengiriman</span></div>
+				<div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
 				<div class="step-title btn btn-success"><span class="step-order">4.</span> <span class="step-name">Ringkasan Order</span></div>
-				<div class="step-title btn disabled"><span class="step-order">5.</span> <span class="step-name">Selesai</span></div>
+				<div class="step-title btn disabled"><span class="step-order">5.</span> <span class="step-name hidden-phone">Selesai</span></div>
 			</div>
 		</div>
 		<div class="row-fluid box">
@@ -76,9 +76,16 @@
 								<td>{{jadiRupiah($kodeunik)}}</td>
 							</tr>
 							<tr>
+								<td colspan="4" style="text-align: right">
+									<div class="item">
+										Pajak
+									</div>
+								</td>
+								<td>{{Pajak::all()->first()->status==0? '<span class="label label-success">non-aktif</span>' : Pajak::all()->first()->pajak.'%'}}</td>
+							</tr>
+							<tr>
 								<td colspan="4" style="text-align: right"><div class="item">Total :</div></td>
-								<td>
-									{{Pajak::all()->first()->status==0? '<small>pajak non-aktif</small>' : Pajak::all()->first()->pajak.'%'}}<br><br>
+								<td>									
 									<strong>{{jadiRupiah($total)}}</strong></td>
 								</tr>                           
 							</tbody>
@@ -128,11 +135,11 @@
 								</table>								
 							</div>
 							<div class="span6">
-								<h4>Data Penerima</h4>
+								<h4>Data Pembeli</h4>
 								<table class="table table-bordered">
-									<tbody>										
+									<tbody>
 										<tr>
-											<td>Nama</td>
+											<td><strong>Nama</strong></td>
 											<td>{{($datapengirim['statuspenerima']==1) ?  $datapengirim['namapenerima'] : $datapengirim['nama']}}</td>
 										</tr>
 										<tr>
@@ -160,9 +167,9 @@
 											<td>{{($datapengirim['statuspenerima']==1) ? $datapengirim['kodepospenerima'] : $datapengirim['kodepos']}}</td>
 										</tr>
 									</tbody>
-								</table>
-								
+								</table>								
 							</div>
+							
 						</div>
 						<div class="row-fluid">
 							<div class="span12">
