@@ -179,13 +179,17 @@ $(document).ready(function(){
                 draggable: false,
                 open: function(event, ui){ 
                     $(".ui-dialog-titlebar").hide();
+                    h = parseInt($("#cart_dialog").css('height'))/2-8;
+                    w = parseInt($("#cart_dialog").css('width'))/2-8;
+                    alert (h);
+                    $("#cart_dialog").find('img').css({'margin-left':w+'px','margin-top':h+'px'});
                     fluidDialog();                          
                     $.ajax({                
                         url: URL+'/cart',
                         type: 'post',
                         data: {produkId:produkId,namaopsi:namaopsi,opsi:opsi,qty:qty}
                     }).done(function(data){
-                        alert(data);
+                        //alert(data);
                         if(data=='stok'){
                             noty({"text":'Maaf, Stok tidak mencukupi.',"layout":"center","type":'error','speed': 100});
                             $( "#cart_dialog" ).dialog('close');        
@@ -341,21 +345,25 @@ $(document).ready(function(){
                     if(data=='false'){
                         noty({"text":'Maaf, Kode diskon tidak ditemukan.',"layout":"top","type":'error','speed': 100});     
                         $('#kupontext').html('Kode diskon tidak ditemukan.');
+                        $('#kuponplace').val('');
                         btn.button('reset');
                     }                   
                     else if(data=='false2'){
                         noty({"text":'Maaf, Order Tidak Memenuhi minimal belanja.',"layout":"top","type":'error','speed': 100});        
                         $('#kupontext').html('Tidak Memenuhi minimal belanja.');
+                        $('#kuponplace').val('');
                         btn.button('reset');
                     }                   
                     else if(data=='false3'){
                         noty({"text":'Maaf, Kupon diskon anda sudah expired.',"layout":"top","type":'error','speed': 100});     
                         $('#kupontext').html('Kupon diskon sudah expired.');
+                        $('#kuponplace').val('');
                         btn.button('reset');
                     }                   
                     else if(data=='false4'){
                         noty({"text":'Maaf, Kupon tidak ditemukan untuk produk anda.',"layout":"top","type":'error','speed': 100});     
                         $('#kupontext').html('Kupon tidak berlaku untuk produk anda.');
+                        $('#kuponplace').val('');
                         btn.button('reset');
                     }                   
                     else{                       
@@ -398,13 +406,53 @@ $(document).ready(function(){
 
         return false;
     });
+    var jqxhr;
+    var running = false;
+    $('#tujuan').typeahead({
+        source: function (query, process) {            
+                tujuan = $('#tujuan').val();
+                if(running==true){
+                    if(jqxhr && jqxhr.readystate != 4){
+                        jqxhr.abort();
+                    }
+                }                
+            
+                jqxhr = $.ajax({
+                    url: URL+'/carikota/'+tujuan ,   
+                    dataType: 'json',
+                    beforeSend: function (){
+                        $('#searchkota').append(lod);
+                        running = true;
+                    },
+                    success: function (data) {
+                        running = false;
+                        return typeof data == 'undefined' ? false : process(data['item']);
+                    },
+                    complete:function(){
+                        $('#lod').remove();
+                    }
+                });        
 
+                return jqxhr;
+        },
+        minLength : 3,
+        updater: function(item) {
+            // do what you want with the item here
+            $('#tujuan').val(item);
+            $("#ekspedisibtn").trigger('click');
+            return item;
+        }
+
+    });
     //js pilih provinsi
     $('#ekspedisibtn').click(function(){    
             var btn = $('#ekspedisibtn');
             tujuan = $('#tujuan').val();
             tampung = $('#ekspedisilist').val();
             if(tujuan !=''){
+                if(jqxhr && jqxhr.readystate != 4){
+                    jqxhr.abort();
+                }
                 $('#ekspedisiplace').slideUp(100,function(){
                     btn.button('loading');
                     $.ajax({
@@ -445,7 +493,7 @@ $(document).ready(function(){
         });
 
     //js checked radio
-    $('body').on('click','input[name="ekspedisilist"]',function(e){
+    $('body').on('click','input[name="ekspedisilist"]',function(){
         tujuan = $('#tujuan').val();
         var total = $('#subtotalcart').html();
         format = total.replace(/[0-9]/g, '');
@@ -462,15 +510,6 @@ $(document).ready(function(){
         }).done(function(data){
             $('#statusEkspedisi').val(1);
             $('#ekspedisilist').val(value);
-        }).done(function(){
-            if (e.originalEvent === undefined){                
-            }else{
-               pos =  $('#ekspedisitext').position();
-               alert (pos.top);
-               $('html, body').animate({
-                scrollTop: pos.top
-                }, 500);
-            }
         });
     });
 
@@ -607,6 +646,15 @@ $(document).ready(function(){
 
 });
 
+function findCity(){
+    tujuan = $('#tujuan').val();
+    $.ajax({
+        url: URL+'/carikota/'+tujuan ,           
+        type: 'get'
+    }).done(function(data){
+        return data['item'];
+    });
+}
 function calculate(){
     var total =0;
     if($('#ekspedisitext').length){

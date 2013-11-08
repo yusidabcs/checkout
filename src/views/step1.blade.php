@@ -106,25 +106,34 @@
                     </table> 
                      <div class="row-fluid">
                             <div class="span6">
+
+                                <input type="hidden" id="statusPengiriman" value="{{$pengaturan->statusEkspedisi}}">
+                                <input type="hidden" id="statusEkspedisi" value="{{$statusEkspedisi}}">
+                                <input type="hidden" id="ekspedisilist" value="{{$ekspedisi!=null? $ekspedisi['ekspedisi'].';'.$ekspedisi['tarif']:''}}">
+
                                 <div class="well">
-                                        <input type="hidden" id="statusPengiriman" value="{{$pengaturan->statusEkspedisi}}">
-                                        <input type="hidden" id="statusEkspedisi" value="{{$statusEkspedisi}}">
-                                        <input type="hidden" id="ekspedisilist" value="{{$ekspedisi!=null? $ekspedisi['ekspedisi'].';'.$ekspedisi['tarif']:''}}">
-                                        @if($pengaturan->statusEkspedisi==1)
+                                @if($pengaturan->statusEkspedisi==1)
                                         <h4>Biaya Pegiriman</h4>
                                         <small>Masukkan kota tujuan anda untuk menghitung biaya pengiriman</small><br><br>
-                                        <div class="form-horizontal">
+                                        <div class="form-horizontal" id="searchkota">
                                             <input style="width: 50%;" type="text" class="input" id='tujuan' placeholder="Kota tujuan pengiriman..." value="{{$ekspedisi!=null?$ekspedisi['tujuan']:''}}">
-                                            <button type="button" class="btn" id='ekspedisibtn'>Cari</button>
+                                            <button type="button" class="btn" id='ekspedisibtn'>Cari</button>                                            
                                         </div>
                                         <br>
                                         <div id='ekspedisiplace'>
                                             {{$ekspedisi!=null? "- ".$ekspedisi['ekspedisi']."<br><br>":''}}
                                         </div>
                                         <small style="font-style: italic;">(*) Bila kota anda tidak ditemukan atau tidak ada dalam daftar, pilihlah kota yang terdekat</small>
-                                        @endif                                          
+                                @elseif($pengaturan->statusEkspedisi==2)
+                                    <h2 class="text-center">Pengiriman Gratis</h2>
+                                    <p class="text-center"><small>Anda tidak dikenakan biaya pengirimiman pada order ini.</small></p>                                
+                                @elseif($pengaturan->statusEkspedisi==3)
+                                    <h2 class="text-center">Pengiriman Menyusul</h2>
+                                    <p class="text-center"><small>{{$pengaturan->keteranganEkspedisi}}</small></p>
+                                @endif
 
-                                    </div>
+                                </div>
+
                             </div>
                             <div class="span6">
                                 <div class="well">

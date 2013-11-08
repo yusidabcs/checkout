@@ -38,16 +38,17 @@
 								<table class="table">
 									@foreach($banktrans as $key =>$banktran)
 									<tr>
-										<td >
+										<td class="center">
 											@foreach($banks as $key => $logoBank)
 												@if($banktran->bankDefaultId==$logoBank->id)
-													<img src="{{URL::to('img/'.$logoBank->logo)}}" style="max-width: none;">
+													<img src="{{URL::to('img/'.$logoBank->logo)}}" width="80">
 												@endif
 											@endforeach
 										</td>
-										<td width='90%'><h4>{{ $banktran->bankdefault->nama}} : {{$banktran->noRekening}}</h4> A/n {{$banktran->atasNama}}</td>
+										<td class="center">{{$banktran->noRekening}}</td>
+										<td class="center">{{$banktran->atasNama}}</td>                   
 									</tr>
-									@endforeach									
+									@endforeach							
 								</table>
 								<hr>
 								<p>Setelah melakukan pembayaran anda bisa mengkonfirmasi pembayaran anda disini:</p>

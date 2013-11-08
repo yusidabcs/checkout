@@ -148,7 +148,8 @@
                         </div><!--/row-->
 
                     <div class="clearfix"></div>
-                    <small>Copyright 2013 by {{$kontak->nama}}</small>
+                    <br>
+                    <small>Copyright © 2013 {{$kontak->nama}}. All Rights Reserved. Powered by <a href="http://www.jarvis-store.com">Jarvis Store</a></small>
                     <br><br>     
                 </div><!--/.fluid-container-->
             </div>

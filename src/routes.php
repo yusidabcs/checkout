@@ -8,6 +8,12 @@ Route::group(array('before' => 'subdomain'), function() {
 	Route::post('konfirmasi', 'Yusidabcs\Checkout\CheckoutController@konfirmasi');
 	Route::get('konfirmasi', 'Yusidabcs\Checkout\CheckoutController@konfirmasi');
 	Route::post('finish', 'Yusidabcs\Checkout\CheckoutController@finish');
+	Route::get('finish', 'Yusidabcs\Checkout\CheckoutController@finish');
 	Route::resource('konfirmasiorder', 'KonfirmasiOrderController');
+
+	Route::get('carikota/{any}',function($any){
+		$city = Ongkir::getCity($any,'JSON');	
+		return Response::json($city);
+	});
 });
 

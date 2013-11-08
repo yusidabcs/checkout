@@ -3,6 +3,7 @@ require app_path().'/GoPayPal.class.php';
 /**
  * Libraries we can use.
  */
+use Akun;
 use Produk;
 use Opsisku;
 use Kategori;
@@ -92,7 +93,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('statusEkspedisi',$status)
             ->with('ekspedisi',$ekspedisi)
             ->with('diskon',$diskon)
-            ->with('kontak', $this->setting);
+            ->with('kontak', $this->setting)
+            ->with('akun',Akun::find($this->akunId));
         $this->layout->seo = View::make('checkout::seostuff')
         ->with('title',"Checkout - Rincian Belanja - ".$this->setting->nama)
         ->with('description',$this->setting->deskripsi)
@@ -143,7 +145,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         $this->layout->content = View::make('checkout::step3')->with('cart' ,Shpcart::cart())
             ->with('banks',BankDefault::all())
             ->with('user',(Sentry::check() ? Sentry::getUser():''))
-            ->with('banktrans' ,Bank::where('akunId','=',$this->akunId)->get())
+            ->with('banktrans' ,Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get())
             ->with('paypal' , $akun[0])
             ->with('creditcard', $akun[1])
             ->with('pembayaran',Session::has('pembayaran')? Session::get('pembayaran'):null)
@@ -350,7 +352,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                             </td>
                             <td colspan=2><h4>".jadiRupiah($order->total)."</h4></td>
                         </tr></table>";
-            $bank = View::make('admin.pengaturan.bank')->with('banks', BankDefault::all()) ->with('banktrans', Bank::all());
+            $bank = View::make('admin.pengaturan.bank')->with('banks', BankDefault::all()) ->with('banktrans', Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get());
             Shpcart::cart()->destroy();
             //kirim email order ke pelanggan
             $template = Templateemail::find(1);
@@ -428,7 +430,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('datapembayaran', $pembayaran)
             ->with('order', $order)
             ->with('banks' ,BankDefault::all())
-            ->with('banktrans', Bank::where('akunId','=',$this->akunId))
+            ->with('banktrans', Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get())
             ->with('paypal',  $akun[0])
             ->with('creditcard' , $akun[1])
             ->with('pengaturan', $this->setting)
