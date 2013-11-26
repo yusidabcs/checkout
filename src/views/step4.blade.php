@@ -81,7 +81,7 @@
 										Pajak
 									</div>
 								</td>
-								<td>{{Pajak::all()->first()->status==0? '<span class="label label-success">non-aktif</span>' : Pajak::all()->first()->pajak.'%'}}</td>
+								<td>{{$pajak->status==0? '<span class="label label-success">non-aktif</span>' : $pajak->pajak.'%'}}</td>
 							</tr>
 							<tr>
 								<td colspan="4" style="text-align: right"><div class="item">Total :</div></td>
@@ -135,11 +135,11 @@
 								</table>								
 							</div>
 							<div class="span6">
-								<h4>Data Pembeli</h4>
+								<h4>Data Penerima</h4>
 								<table class="table table-bordered">
 									<tbody>
 										<tr>
-											<td><strong>Nama</strong></td>
+											<td>Nama</td>
 											<td>{{($datapengirim['statuspenerima']==1) ?  $datapengirim['namapenerima'] : $datapengirim['nama']}}</td>
 										</tr>
 										<tr>

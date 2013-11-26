@@ -94,7 +94,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('ekspedisi',$ekspedisi)
             ->with('diskon',$diskon)
             ->with('kontak', $this->setting)
-            ->with('akun',Akun::find($this->akunId));
+            ->with('akun',Akun::find($this->akunId))
+            ->with('pajak',Pajak::where('akunId','=',$this->akunId)->first());
         $this->layout->seo = View::make('checkout::seostuff')
         ->with('title',"Checkout - Rincian Belanja - ".$this->setting->nama)
         ->with('description',$this->setting->deskripsi)
@@ -193,7 +194,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('kodeunik', Session::get('kodeunik'))
             ->with('diskon', $potongan)
             ->with('total', $total)
-            ->with('kontak', $this->setting);
+            ->with('kontak', $this->setting)
+            ->with('pajak',Pajak::where('akunId','=',$this->akunId)->first());
         $this->layout->seo = View::make('checkout::seostuff')
             ->with('title',"Checkout - Ringkasan Order - ".$this->setting->nama)
             ->with('description',$this->setting->deskripsi)
@@ -248,18 +250,37 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 'activated' => 1,
                 'akunId' => $this->akunId
             );
-
-            $user = Sentry::getUserProvider()->create($data);
-            $userGroup = Sentry::getGroupProvider()->findById(3);
+           $pelangganId =  DB::table('pelanggan')->insertGetId(
+                    array(
+                    'nama' => $datapengirim['nama'],
+                    'email'    => $datapengirim['email'],
+                    'password' => 'guest',
+                    'kodepos' => $datapengirim['kodepos'],
+                    'perusahaan' => '',
+                    'telp' => $datapengirim['telp'],
+                    'alamat' => $datapengirim['alamat'],
+                    'negara' => $datapengirim['negara'],
+                    'provinsi' => $datapengirim['provinsi'],
+                    'kota' => $datapengirim['kota'],
+                    'tglLahir' => '',
+                    'catatan' => '',
+                    'tags' => '',
+                    'tipe' => 0,
+                    'tanggalMasuk' => date("Y-m-d"),
+                    'activated' => 1,
+                    'akunId' => $this->akunId
+                )  
+            );
+            //$user = Sentry::getUserProvider()->create($data);
+            //$userGroup = Sentry::getGroupProvider()->findById(3);
              // Assign the group to the user
-            $user->addGroup($userGroup);            
-            $pelangganId = $user->id;
+            //$user->addGroup($userGroup);            
+            //$pelangganId = $user->id;
             //return $pelangganId;
         }else{
             //pelanggan
             $pelangganId = Sentry::getUser()->id;
         }
-        
         //ekspedisi 
         $ekspedisi =Session::get('ekspedisiId');
         $jenispengiriman = Session::get('ekspedisiId');
@@ -284,8 +305,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 $potongan = (Shpcart::cart()->total()*Session::get('besarPotongan')/100);
             }
         }
-        $total = (Shpcart::cart()->total() + Session::get('ongkosKirim')- $potongan) + Session::get('kodeunik');
-        $total = $total + (Pajak::where('akunId','=',$this->akunId)->first()->status==0 ? 0 : $total * Pajak::where('akunId','=',$this->akunId)->pajak / 100);
+        $total = (Shpcart::cart()->total() + Session::get('ongkosKirim')- $potongan) + Session::get('kodeunik');        
+        $total = $total + (Pajak::where('akunId','=',$this->akunId)->first()->status==0 ? 0 : $total * Pajak::where('akunId','=',$this->akunId)->first()->pajak / 100);
 
         //save order
         $order = new Order;
@@ -303,9 +324,9 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             $order->kota = Kabupaten::find($datapengirim['kota'])->nama;    
         }
         else{
-            $order->nama = Input::get('namapenerima');
-            $order->telp = Input::get('telppenerima');
-            $order->alamat = Input::get('alamatpenerima');
+            $order->nama = $datapengirim['namapenerima'];
+            $order->telp = $datapengirim['telppenerima'];
+            $order->alamat = $datapengirim['alamatpenerima'];
             $order->kota = Kabupaten::find($datapengirim['kotapenerima'])->nama;
         }
         $order->pesan = $datapengirim['pesan'];

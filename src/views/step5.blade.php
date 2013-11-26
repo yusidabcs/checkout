@@ -36,6 +36,13 @@
 								<br>
 
 								<table class="table">
+									<tr>
+										<td class="center">
+										Bank
+										</td>
+										<td class="center">No rekening</td>
+										<td class="center">Atas Nama</td>                   
+									</tr>
 									@foreach($banktrans as $key =>$banktran)
 									<tr>
 										<td class="center">

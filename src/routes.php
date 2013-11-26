@@ -15,5 +15,9 @@ Route::group(array('before' => 'subdomain'), function() {
 		$city = Ongkir::getCity($any,'JSON');	
 		return Response::json($city);
 	});
+	Route::get('allcity',function(){
+		$city = Ongkir::getCity('','JSON');	
+		return Response::json($city);
+	});
 });
 

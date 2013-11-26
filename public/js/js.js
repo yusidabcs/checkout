@@ -366,7 +366,7 @@ $(document).ready(function(){
                         $('#kuponplace').val('');
                         btn.button('reset');
                     }                   
-                    else{                       
+                    else{                  
                         var total = $('#subtotalcart').html();
                         totalbelanja = total.replace(/[^\0-9]/ig, "");
                         totalbelanja = totalbelanja.replace(/\./g,"");
@@ -408,7 +408,7 @@ $(document).ready(function(){
     });
     var jqxhr;
     var running = false;
-    $('#tujuan').typeahead({
+    /*$('#tujuan').typeahead({
         source: function (query, process) {            
                 tujuan = $('#tujuan').val();
                 if(running==true){
@@ -416,7 +416,7 @@ $(document).ready(function(){
                         jqxhr.abort();
                     }
                 }                
-            
+                rs = [];
                 jqxhr = $.ajax({
                     url: URL+'/carikota/'+tujuan ,   
                     dataType: 'json',
@@ -426,14 +426,18 @@ $(document).ready(function(){
                     },
                     success: function (data) {
                         running = false;
-                        return typeof data == 'undefined' ? false : process(data['item']);
-                    },
-                    complete:function(){
+                        rs= [];
+                        $('#searchkota').append(lod);
+                        for(i=0;i<data['item'].length;i++){
+                            rs.push(data['item'][i]);
+                        }
+                        return rs;
                         $('#lod').remove();
+                    },
+                    complete:function(){                        
                     }
                 });        
-
-                return jqxhr;
+                return process(jqxhr);
         },
         minLength : 3,
         updater: function(item) {
@@ -443,7 +447,7 @@ $(document).ready(function(){
             return item;
         }
 
-    });
+    });*/
     //js pilih provinsi
     $('#ekspedisibtn').click(function(){    
             var btn = $('#ekspedisibtn');
@@ -817,4 +821,10 @@ function fluidDialog() {
 }
 function close_dialog(){
     $( "#cart_dialog" ).dialog('close');
+}
+function alphanum(id){
+    id.value = id.value.replace(/[^a-zA-Z0-9]/,'');
+    if(id.value==''){
+        id.value='';
+    }
 }

@@ -1,4 +1,14 @@
 @section('content')
+@if(Session::has('login'))
+<div id="message" class="success">
+Selamat, anda berhasil login.
+</div>
+@endif
+@if(Session::has('error'))
+<div id="message" class="error">
+    {{Session::get('error')}}
+</div>
+@endif
 <div id="demos">
     <h2>Checkout - Rincian Belanja</h2>
     <br>
@@ -83,7 +93,7 @@
                                 <td class="center">
                                     Pajak
                                 </td> 
-                                <td colspan="2"><span id='pajaktext'>{{Pajak::all()->first()->status==0? '<span class="label label-success">non-aktif</span>' : Pajak::all()->first()->pajak.'%'}}</td>                            
+                                <td colspan="2"><span id='pajaktext'>{{$pajak->status==0? '<span class="label label-success">non-aktif</span>' : $pajak->pajak.'%'}}</td>                            
                             </tr> 
                             <tr>
                                 <td colspan="2"></td>
@@ -140,7 +150,7 @@
                                         <h4>Kode Diskon</h4>
                                         <small>Gunakan kode kupon pada kolom dibawah jika ada</small><br><br>
                                         <div class="form-horizontal">
-                                            <input style="width: 50%;" type="text" class="input" placeholder="Kode kupon..." name='kodeplace' id='kuponplace' value="{{$diskon!=null? $diskon['diskonId']->kode:''}}" {{$diskon!=null? 'disabled':''}}>
+                                            <input style="width: 50%;" type="text" class="input" placeholder="Kode kupon..." name='kodeplace' id='kuponplace' value="{{$diskon!=null? $diskon['diskonId']->kode:''}}" {{$diskon!=null? 'disabled':''}} onkeyup="alphanum(this)">
                                             <button type="submit" class="btn" id='kuponbtn'>{{$diskon!=null? 'Cancel':'Pakai Kupon'}}</button>
                                             {{$diskon!=null? '<input type="hidden" id="diskonstatus" value="1">':''}}
                                             
