@@ -408,7 +408,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 $paypal = new GoPayPal(THIRD_PARTY_CART);
                 $paypal->sandbox = true;
                 $paypal->openInNewWindow = true;
-                $paypal->set($akun[0]->tipe, $akun[0]->acount);
+                $paypal->set('business', $akun[0]->acount);
                 $paypal->set('currency_code', 'USD');
                 $paypal->set('country', 'US');
                 $paypal->set('return', URL::to('konfirmasiorder/'.$order->id));
@@ -425,7 +425,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 $item->set('item_number', '1');
                 $total = $order->total;
                 if($this->setting->mataUang == 1){
-                    $total =round($order->total / Currencies::where('akunId','=',$this->akunId)->first()->rate); 
+                    $total =round($order->total / OnlineAkun::where('akunId','=',$this->akunId)->first()->rate); 
                 }
                 $item->set('amount', $total);
                 $item->set('quantity', 1);
