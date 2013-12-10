@@ -179,10 +179,6 @@ $(document).ready(function(){
                 draggable: false,
                 open: function(event, ui){ 
                     $(".ui-dialog-titlebar").hide();
-                    h = parseInt($("#cart_dialog").css('height'))/2-8;
-                    w = parseInt($("#cart_dialog").css('width'))/2-8;
-                    alert (h);
-                    $("#cart_dialog").find('img').css({'margin-left':w+'px','margin-top':h+'px'});
                     fluidDialog();                          
                     $.ajax({                
                         url: URL+'/cart',
@@ -325,11 +321,15 @@ $(document).ready(function(){
                   {
                     $('#kuponbtn').trigger('click');
                   }else{
-                   noty({"text":'Kupon berhasil di cancel.',"layout":"top","type":'error','speed': 100});      
+                   noty({"text":'Kupon berhasil di cancel.',"layout":"top","type":'success','speed': 500});      
                   }
                  $('#diskonstatus').remove();
                  btn.button('reset');
                  btn.html('Pakai Kupon');
+            }).error(function(){
+                noty({"text":'Opss, something error.',"layout":"center","type":'error','speed': 500});
+                btn.button('reset');
+                btn.html('Pakai Kupon');   
             });
 
         }else{
@@ -341,32 +341,13 @@ $(document).ready(function(){
                     url: URL+'/cart/checkdiskon/'+kode,         
                     type: 'get'
                 }).done(function(data){     
+                    $.noty.closeAll();
                     var potongan = 0;
-                    if(data=='false'){
-                        noty({"text":'Maaf, Kode diskon tidak ditemukan.',"layout":"top","type":'error','speed': 100});     
+                    if(data['error']!=0){
+                        noty({"text":data['error'],"layout":"top","type":'error'});     
                         $('#kupontext').html('Kode diskon tidak ditemukan.');
-                        $('#kuponplace').val('');
                         btn.button('reset');
-                    }                   
-                    else if(data=='false2'){
-                        noty({"text":'Maaf, Order Tidak Memenuhi minimal belanja.',"layout":"top","type":'error','speed': 100});        
-                        $('#kupontext').html('Tidak Memenuhi minimal belanja.');
-                        $('#kuponplace').val('');
-                        btn.button('reset');
-                    }                   
-                    else if(data=='false3'){
-                        noty({"text":'Maaf, Kupon diskon anda sudah expired.',"layout":"top","type":'error','speed': 100});     
-                        $('#kupontext').html('Kupon diskon sudah expired.');
-                        $('#kuponplace').val('');
-                        btn.button('reset');
-                    }                   
-                    else if(data=='false4'){
-                        noty({"text":'Maaf, Kupon tidak ditemukan untuk produk anda.',"layout":"top","type":'error','speed': 100});     
-                        $('#kupontext').html('Kupon tidak berlaku untuk produk anda.');
-                        $('#kuponplace').val('');
-                        btn.button('reset');
-                    }                   
-                    else{                  
+                    }else if(data['error']==0 && data['success']==1){
                         var total = $('#subtotalcart').html();
                         totalbelanja = total.replace(/[^\0-9]/ig, "");
                         totalbelanja = totalbelanja.replace(/\./g,"");
@@ -376,18 +357,18 @@ $(document).ready(function(){
                         format = format.replace(/\./g,"");
                         format = format.replace(/<(?:.|\n)*?>/gm, '');
                         
-                        if(data[2]==2){
-                            $('#kupontext').html(format+' '+data[1]+' ('+data[3]+'%)');
+                        if(data['type']==2){
+                            $('#kupontext').html(format+' '+data['potongan']+' ('+data['besarPotongan']+'%)');
 
                         }else{
-                            potongan = parseInt(data[1]);
+                            potongan = parseInt(data['potongan']);
                             $('#kupontext').html(format+' '+potongan.formatMoney(0,'.','.'));
                         }           
                         if (e.originalEvent === undefined)
                           {
                         
                           } else{
-                            noty({"text":'Selamat, Kupan ditemukan.',"layout":"top","type":'error','speed': 100});          
+                            noty({"text":'Selamat, Kupan ditemukan.',"layout":"top","type":'success'});          
                           }  
                         
                         btn.button('reset');        
@@ -396,8 +377,11 @@ $(document).ready(function(){
                         $("#kuponbtn").prop('value', 'Cancel');
                         $("#kuponbtn").html('Cancel');
                         calculate();
-                    }
-                    //$('#potongan').val(potongan);
+                    }                    
+                }).error(function(){
+                    noty({"text":'Opss, something error.',"layout":"center","type":'error','speed': 500});
+                    btn.button('reset');
+                    btn.html('Pakai Kupon');   
                 });
             }else{
                 $('#kuponplace').focus();
@@ -406,57 +390,13 @@ $(document).ready(function(){
 
         return false;
     });
-    var jqxhr;
-    var running = false;
-    /*$('#tujuan').typeahead({
-        source: function (query, process) {            
-                tujuan = $('#tujuan').val();
-                if(running==true){
-                    if(jqxhr && jqxhr.readystate != 4){
-                        jqxhr.abort();
-                    }
-                }                
-                rs = [];
-                jqxhr = $.ajax({
-                    url: URL+'/carikota/'+tujuan ,   
-                    dataType: 'json',
-                    beforeSend: function (){
-                        $('#searchkota').append(lod);
-                        running = true;
-                    },
-                    success: function (data) {
-                        running = false;
-                        rs= [];
-                        $('#searchkota').append(lod);
-                        for(i=0;i<data['item'].length;i++){
-                            rs.push(data['item'][i]);
-                        }
-                        return rs;
-                        $('#lod').remove();
-                    },
-                    complete:function(){                        
-                    }
-                });        
-                return process(jqxhr);
-        },
-        minLength : 3,
-        updater: function(item) {
-            // do what you want with the item here
-            $('#tujuan').val(item);
-            $("#ekspedisibtn").trigger('click');
-            return item;
-        }
 
-    });*/
     //js pilih provinsi
     $('#ekspedisibtn').click(function(){    
             var btn = $('#ekspedisibtn');
             tujuan = $('#tujuan').val();
             tampung = $('#ekspedisilist').val();
             if(tujuan !=''){
-                if(jqxhr && jqxhr.readystate != 4){
-                    jqxhr.abort();
-                }
                 $('#ekspedisiplace').slideUp(100,function(){
                     btn.button('loading');
                     $.ajax({
@@ -650,15 +590,6 @@ $(document).ready(function(){
 
 });
 
-function findCity(){
-    tujuan = $('#tujuan').val();
-    $.ajax({
-        url: URL+'/carikota/'+tujuan ,           
-        type: 'get'
-    }).done(function(data){
-        return data['item'];
-    });
-}
 function calculate(){
     var total =0;
     if($('#ekspedisitext').length){
@@ -821,10 +752,4 @@ function fluidDialog() {
 }
 function close_dialog(){
     $( "#cart_dialog" ).dialog('close');
-}
-function alphanum(id){
-    id.value = id.value.replace(/[^a-zA-Z0-9]/,'');
-    if(id.value==''){
-        id.value='';
-    }
 }
