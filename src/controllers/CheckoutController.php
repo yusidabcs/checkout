@@ -29,6 +29,7 @@ use ShopCartController;
 use GoPayPal;
 use GoPayPalCartItem;
 use Currencies;
+use Historydiskon;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Input;
@@ -51,56 +52,68 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
     
     public function index()
     {   
-        Session::forget('pengiriman');
-        if(URL::previous()!=URL::to('pengiriman') && URL::previous()!=URL::to('pembayaran') && URL::previous()!=URL::to('konfirmasi')){
-            Session::forget('besarPotongan');
-            Session::forget('diskonId');
-            Session::forget('tipe'); 
-            Session::forget('tujuan');
-            Session::forget('ekspedisiId');
-            Session::forget('ongkosKirim');
-        }
-        $kode = rand(100,200);
-        $pengaturan = $this->setting;
-        if($pengaturan->statusEkspedisi!=1){
-            if($pengaturan->statusEkspedisi==2)
-                Session::set('ekspedisiId',"Free Shipping");
-            if($pengaturan->statusEkspedisi==3)
-                Session::set('ekspedisiId',"Pengiriman Menyusul");
-            Session::set('ongkosKirim',0);
-        }
-        //$eks = New ShopCartController;
-        //$data = $eks->checkekspedisi('surabaya');
-        $selected = Session::get('ekspedisiId').';'.Session::get('ongkosKirim');
+        $pengaturan = Pengaturan::where('akunId', $this->akunId)->first();        
+        if ($pengaturan->checkoutType==1) 
+        {
+            Session::forget('pengiriman');
 
-        if(Session::has('ekspedisiId')){
-            $status =1;
-            $ekspedisi = array('tujuan'=>Session::get('tujuan'),'ekspedisi'=>Session::get('ekspedisiId'),'tarif'=>Session::get('ongkosKirim'));
-        }else{
-            $status =0;
-            $ekspedisi=null;
+            if(URL::previous()!=URL::to('checkout') && URL::previous()!=URL::to('pengiriman') && URL::previous()!=URL::to('pembayaran') && URL::previous()!=URL::to('konfirmasi')){                
+                Session::forget('besarPotongan');
+                Session::forget('diskonId');
+                Session::forget('tipe'); 
+                Session::forget('tujuan');
+                Session::forget('ekspedisiId');
+                Session::forget('ongkosKirim');
+            }
+            $kode = rand(100,200);
+            $pengaturan = $this->setting;
+            if($pengaturan->statusEkspedisi!=1){
+                if($pengaturan->statusEkspedisi==2)
+                    Session::set('ekspedisiId',"Free Shipping");
+                if($pengaturan->statusEkspedisi==3)
+                    Session::set('ekspedisiId',"Pengiriman Menyusul");
+                Session::set('ongkosKirim',0);
+            }
+            //$eks = New ShopCartController;
+            //$data = $eks->checkekspedisi('surabaya');
+            $selected = Session::get('ekspedisiId').';'.Session::get('ongkosKirim');
+
+            if(Session::has('ekspedisiId')){
+                $status =1;
+                $ekspedisi = array('tujuan'=>Session::get('tujuan'),'ekspedisi'=>Session::get('ekspedisiId'),'tarif'=>Session::get('ongkosKirim'));
+            }else{
+                $status =0;
+                $ekspedisi=null;
+            }
+            if(Session::has('diskonId')){            
+                $diskon = array('diskonId' => Diskon::find(Session::get('diskonId')), 'besarPotongan'=>Session::get('besarPotongan'));
+            }else{
+                $diskon=null;
+            }
+            Session::put('kodeunik',$kode);
+            $this->layout->content = View::make('checkout::step1')->with('cart' ,Shpcart::cart())
+                ->with('provinsi' ,Provinsi::where('negaraId','=',$this->setting->negara)->get())
+                ->with('kodeunik',$kode)
+                ->with('pengaturan' ,$pengaturan)
+                ->with('statusEkspedisi',$status)
+                ->with('ekspedisi',$ekspedisi)
+                ->with('diskon',$diskon)
+                ->with('kontak', $this->setting)
+                ->with('akun',Akun::find($this->akunId))
+                ->with('pajak',Pajak::where('akunId','=',$this->akunId)->first());
+            $this->layout->seo = View::make('checkout::seostuff')
+            ->with('title',"Checkout - Rincian Belanja - ".$this->setting->nama)
+            ->with('description',$this->setting->deskripsi)
+            ->with('keywords',$this->setting->keyword);
         }
-        if(Session::has('diskonId')){            
-            $diskon = array('diskonId' => Diskon::find(Session::get('diskonId')), 'besarPotongan'=>Session::get('besarPotongan'));
-        }else{
-            $diskon=null;
+        elseif ($pengaturan->checkoutType==2) 
+        {
+            return 1;
         }
-        Session::put('kodeunik',$kode);
-        $this->layout->content = View::make('checkout::step1')->with('cart' ,Shpcart::cart())
-            ->with('provinsi' ,Provinsi::where('negaraId','=',$this->setting->negara)->get())
-            ->with('kodeunik',$kode)
-            ->with('pengaturan' ,$pengaturan)
-            ->with('statusEkspedisi',$status)
-            ->with('ekspedisi',$ekspedisi)
-            ->with('diskon',$diskon)
-            ->with('kontak', $this->setting)
-            ->with('akun',Akun::find($this->akunId))
-            ->with('pajak',Pajak::where('akunId','=',$this->akunId)->first());
-        $this->layout->seo = View::make('checkout::seostuff')
-        ->with('title',"Checkout - Rincian Belanja - ".$this->setting->nama)
-        ->with('description',$this->setting->deskripsi)
-        ->with('keywords',$this->setting->keyword);
+        
     }
+
+
      function pengiriman(){
         //check session cart dan ekspedisi dan diskon                
         if(Shpcart::cart()->total_items()==0 || !(Session::has('ekspedisiId'))) {
@@ -201,7 +214,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('description',$this->setting->deskripsi)
             ->with('keywords',$this->setting->keyword);
     }
-    public function finish(){
+     public function finish()
+    {
         if(Shpcart::cart()->total()==0){
             return Redirect::to('checkout');
         }
@@ -285,16 +299,6 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         $ekspedisi =Session::get('ekspedisiId');
         $jenispengiriman = Session::get('ekspedisiId');
         $ongkosKirim = Session::get('ongkosKirim');
-        //cek diskon
-        if(Session::has('diskonId')){
-            $diskonId = Session::get('diskonId');   
-            $diskon = Diskon::find($diskonId);
-            $diskon->klaim = $diskon->klaim +1;
-            $diskon->save();
-        }else{
-            $diskonId='';
-        }
-
         //get total order
         $potongan = 0;
         
@@ -345,6 +349,20 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         $order->akunId = $this->akunId;
         $order->save();
         if($order){
+            //cek diskon
+            if(Session::has('diskonId')){
+                $diskonId = Session::get('diskonId');   
+                $diskon = Diskon::find($diskonId);
+                $diskon->klaim = $diskon->klaim +1;
+                $diskon->save();
+                if (Sentry::check()) 
+                {
+                     HistoryDiskon::insertDiscountHistory($diskonId, Sentry::getUser()->id, $order->id);
+                }
+            }else{
+                $diskonId='';
+            }
+
             //tambah det order
             $cart_contents = Shpcart::cart()->contents();
             foreach ($cart_contents as $key => $value) {
