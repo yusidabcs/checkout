@@ -254,15 +254,18 @@ $(document).ready(function(){
                 }).done(function(data){                     
                     if(data!='false'){
                         data = data.split(';')
-                        var place = $('.'+rowid);
-                        var harga = $('.'+rowid).html();
-                        harga = harga.replace(/[0-9]/g, '');
-                        harga = harga.replace(/\./g,"");
-                        harga = harga.replace(/<(?:.|\n)*?>/gm, '');                
-                        place.html(harga+' '+parseInt(data[0]).formatMoney(0,'.',''));  
-                        $('#subtotalcart').html(harga+' '+parseInt(data[1]).formatMoney(0,'.','')); 
-                        noty({"text":'Selamat, Cart berhasil di update. Kalkulasi ulang.',"layout":"center","type":'success'});                  
+                        if ($('#subtotalcart').length) 
+                        {
+                            var place = $('.'+rowid);
+                            var harga = $('.'+rowid).html();
+                            harga = harga.replace(/[0-9]/g, '');
+                            harga = harga.replace(/\./g,"");
+                            harga = harga.replace(/<(?:.|\n)*?>/gm, '');                
+                            place.html(harga+' '+parseInt(data[0]).formatMoney(0,'.',''));  
+                            $('#subtotalcart').html(harga+' '+parseInt(data[1]).formatMoney(0,'.',''));   
+                        }                                   
                         temp = qty;
+                        noty({"text":'Selamat, Cart berhasil di update. Kalkulasi ulang.',"layout":"center","type":'success'});
                     }else{
                         noty({"text":'Maaf, Quantity tidak mencukupi.',"layout":"center","type":'error'});
                         $(input).val(temp);
@@ -272,18 +275,24 @@ $(document).ready(function(){
                     input.readOnly = false;
                 }).done(function(data){
                     if(data!='false'){
-                        tarif = $('#ekspedisilist').val();     
-                        eks = $('#tujuan').val();       
-                        kupon = $('#kuponbtn').html();
-                        if(eks!='' && tarif!=''){
-                            $('#ekspedisibtn').trigger('click');                    
-                        }
-                        if(kupon=='Cancel'){
-                            $('#kuponbtn').trigger('click');
+                        if ($('#subtotalcart').length>0) 
+                        {
+                            tarif = $('#ekspedisilist').val();     
+                            eks = $('#tujuan').val();       
+                            kupon = $('#kuponbtn').html();
+                            if(eks!='' && tarif!=''){
+                                $('#ekspedisibtn').trigger('click');                    
+                            }
+                            if(kupon=='Cancel'){
+                                $('#kuponbtn').trigger('click');
+                            }
                         }
                     }
-                }).done(function(){             
-                    calculate();
+                }).done(function(){   
+                    if ($('#subtotalcart').length>0) 
+                    {
+                        calculate();
+                    }          
                     $('#form1').button('reset');
                 }).error(function(){
                     noty({"text":'Maaf, Terjadi kesalahan.',"layout":"center","type":'error'});
@@ -346,8 +355,34 @@ $(document).ready(function(){
                     if(data['error']!=0){
                         noty({"text":data['error'],"layout":"top","type":'error'});     
                         $('#kupontext').html('Kode diskon tidak ditemukan.');
+<<<<<<< HEAD
                         btn.button('reset');
                     }else if(data['error']==0 && data['success']==1){
+=======
+                        btn.button('reset');
+                    }                   
+                    else if(data=='false2'){
+                        noty({"text":'Maaf, Order Tidak Memenuhi minimal belanja.',"layout":"top","type":'error','speed': 100});        
+                        $('#kupontext').html('Tidak Memenuhi minimal belanja.');
+                        btn.button('reset');
+                    }                   
+                    else if(data=='false3'){
+                        noty({"text":'Maaf, Kupon diskon anda sudah expired.',"layout":"top","type":'error','speed': 100});     
+                        $('#kupontext').html('Kupon diskon sudah expired.');
+                        btn.button('reset');
+                    }                   
+                    else if(data=='false4'){
+                        noty({"text":'Maaf, Kupon tidak ditemukan untuk produk anda.',"layout":"top","type":'error','speed': 100});     
+                        $('#kupontext').html('Kupon tidak berlaku untuk produk anda.');
+                        btn.button('reset');
+                    }   
+                    else if(data=='false5'){
+                        noty({"text":'Maaf, Kupon sudah terpakai.',"layout":"top","type":'error','speed': 100});     
+                        $('#kupontext').html('Kupon sudah terpakai.');
+                        btn.button('reset');
+                    }                   
+                    else{                       
+>>>>>>> tmbah inquiry
                         var total = $('#subtotalcart').html();
                         totalbelanja = total.replace(/[^\0-9]/ig, "");
                         totalbelanja = totalbelanja.replace(/\./g,"");
@@ -658,19 +693,28 @@ function deletecart(id){
                         url: URL+'/cart/delete/'+id,            
                         type: 'get'
                     }).done(function(data){
-                        $('#subtotalcart').html(data['total']);  
-                        calculate();
-                        if(data['jumlah']==0){
+                         if ($('#subtotalcart').length) 
+                        {
+                             $('#subtotalcart').html(data['total']);  
+                            calculate();
+                        }
+                        if(data['jumlah']==0)
+                        {
                             window.location = URL+"/checkout";
-                        }else{
-                             tarif = $('#ekspedisilist').val();     
-                            eks = $('#tujuan').val();       
-                            kupon = $('#kuponbtn').html();
-                            if(eks!='' && tarif!=''){
-                                $('#ekspedisibtn').trigger('click');                    
-                            }
-                            if(kupon=='Cancel'){
-                                $('#kuponbtn').trigger('click');
+                        }
+                        else
+                        {
+                            if ($('#subtotalcart').length) 
+                            {
+                                tarif = $('#ekspedisilist').val();     
+                                eks = $('#tujuan').val();       
+                                kupon = $('#kuponbtn').html();
+                                if(eks!='' && tarif!=''){
+                                    $('#ekspedisibtn').trigger('click');                    
+                                }
+                                if(kupon=='Cancel'){
+                                    $('#kuponbtn').trigger('click');
+                                }
                             }
                             $('#cart'+id).remove();
                         }
@@ -752,4 +796,8 @@ function fluidDialog() {
 }
 function close_dialog(){
     $( "#cart_dialog" ).dialog('close');
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> tmbah inquiry
