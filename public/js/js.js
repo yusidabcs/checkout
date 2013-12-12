@@ -330,15 +330,11 @@ $(document).ready(function(){
                   {
                     $('#kuponbtn').trigger('click');
                   }else{
-                   noty({"text":'Kupon berhasil di cancel.',"layout":"top","type":'success','speed': 500});      
+                   noty({"text":'Kupon berhasil di cancel.',"layout":"top","type":'error','speed': 100});      
                   }
                  $('#diskonstatus').remove();
                  btn.button('reset');
                  btn.html('Pakai Kupon');
-            }).error(function(){
-                noty({"text":'Opss, something error.',"layout":"center","type":'error','speed': 500});
-                btn.button('reset');
-                btn.html('Pakai Kupon');   
             });
 
         }else{
@@ -350,15 +346,10 @@ $(document).ready(function(){
                     url: URL+'/cart/checkdiskon/'+kode,         
                     type: 'get'
                 }).done(function(data){     
-                    $.noty.closeAll();
                     var potongan = 0;
-                    if(data['error']!=0){
-                        noty({"text":data['error'],"layout":"top","type":'error'});     
+                    if(data=='false'){
+                        noty({"text":'Maaf, Kode diskon tidak ditemukan.',"layout":"top","type":'error','speed': 100});     
                         $('#kupontext').html('Kode diskon tidak ditemukan.');
-<<<<<<< HEAD
-                        btn.button('reset');
-                    }else if(data['error']==0 && data['success']==1){
-=======
                         btn.button('reset');
                     }                   
                     else if(data=='false2'){
@@ -382,7 +373,6 @@ $(document).ready(function(){
                         btn.button('reset');
                     }                   
                     else{                       
->>>>>>> tmbah inquiry
                         var total = $('#subtotalcart').html();
                         totalbelanja = total.replace(/[^\0-9]/ig, "");
                         totalbelanja = totalbelanja.replace(/\./g,"");
@@ -392,18 +382,18 @@ $(document).ready(function(){
                         format = format.replace(/\./g,"");
                         format = format.replace(/<(?:.|\n)*?>/gm, '');
                         
-                        if(data['type']==2){
-                            $('#kupontext').html(format+' '+data['potongan']+' ('+data['besarPotongan']+'%)');
+                        if(data[2]==2){
+                            $('#kupontext').html(format+' '+data[1]+' ('+data[3]+'%)');
 
                         }else{
-                            potongan = parseInt(data['potongan']);
+                            potongan = parseInt(data[1]);
                             $('#kupontext').html(format+' '+potongan.formatMoney(0,'.','.'));
                         }           
                         if (e.originalEvent === undefined)
                           {
                         
                           } else{
-                            noty({"text":'Selamat, Kupan ditemukan.',"layout":"top","type":'success'});          
+                            noty({"text":'Selamat, Kupan ditemukan.',"layout":"top","type":'error','speed': 100});          
                           }  
                         
                         btn.button('reset');        
@@ -412,11 +402,8 @@ $(document).ready(function(){
                         $("#kuponbtn").prop('value', 'Cancel');
                         $("#kuponbtn").html('Cancel');
                         calculate();
-                    }                    
-                }).error(function(){
-                    noty({"text":'Opss, something error.',"layout":"center","type":'error','speed': 500});
-                    btn.button('reset');
-                    btn.html('Pakai Kupon');   
+                    }
+                    //$('#potongan').val(potongan);
                 });
             }else{
                 $('#kuponplace').focus();
@@ -796,8 +783,4 @@ function fluidDialog() {
 }
 function close_dialog(){
     $( "#cart_dialog" ).dialog('close');
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> tmbah inquiry
