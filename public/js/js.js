@@ -297,6 +297,7 @@ $(document).ready(function(){
                 }).error(function(){
                     noty({"text":'Maaf, Terjadi kesalahan.',"layout":"center","type":'error'});
                     $('#form1').button('reset');
+                    input.readOnly = false;
                 });
             }   
         }
