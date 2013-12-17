@@ -657,8 +657,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 $data = array(
                     'pelanggan'=> $inquiry->nama,
                     'toko' => $this->setting->nama,
-                    'kodeorder' => $inquiry->kodeOrder,
-                    'tanggal' => $inquiry->tanggalOrder,
+                    'kodeorder' => $inquiry->kodeInquiry,
+                    'tanggal' => date("Y-m-d"),
                     'cart' => $cart
                     );
                 $email = bind_to_template($data,$template);            

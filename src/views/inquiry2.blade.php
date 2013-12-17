@@ -7,7 +7,7 @@
             <div class="span12">
                 <div class="step-title btn disabled"><span class="step-order">1.</span> <span class="step-name hidden-phone">Rincian Belanja</span></div>
                 <div class="step-title btn btn-success"><span class="step-order">2.</span> <span class="step-name">Data Pembeli</span></div>
-                <div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name hidden-phone">Ringkasan Order</span></div>
+                <div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name hidden-phone">Ringkasan Inquiry</span></div>
                 <div class="step-title btn disabled"><span class="step-order">4.</span> <span class="step-name hidden-phone">Selesai</span></div>
             </div>
         </div>
