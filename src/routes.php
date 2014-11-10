@@ -1,5 +1,11 @@
 <?php
 Route::group(array('before' => 'subdomain'), function() {
+
+	Route::get('provinsi/{id}','Yusidabcs\Checkout\CheckoutController@getProvinsi');
+	Route::get('kabupaten/{id}','Yusidabcs\Checkout\CheckoutController@getKabupaten');
+	Route::get('searchkotabyname/{id}','Yusidabcs\Checkout\CheckoutController@getKabupatenByName');
+
+
 	Route::get('checkout','Yusidabcs\Checkout\CheckoutController@index');
 	Route::post('pengiriman', 'Yusidabcs\Checkout\CheckoutController@pengiriman');
 	Route::get('pengiriman', 'Yusidabcs\Checkout\CheckoutController@pengiriman');
@@ -21,3 +27,10 @@ Route::group(array('before' => 'subdomain'), function() {
 	});
 });
 
+Route::group(array('prefix'=>'doku' ),function(){
+	Route::resource('verify','Yusidabcs\Checkout\DokuVerifyController', array('only'=>array('store')));
+	Route::resource('notify','Yusidabcs\Checkout\DokuNotifyController', array('only'=>array('store')));
+	Route::resource('redirect','Yusidabcs\Checkout\DokuRedirectController', array('only'=>array('store')));
+	Route::resource('cancel','Yusidabcs\Checkout\DokuCancelController', array('only'=>array('store')));
+
+});

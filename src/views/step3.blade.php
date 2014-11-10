@@ -18,23 +18,34 @@
 				<div class="step-content">
 					<div class="row-fluid">
                        <div class="span4">
-                       	Pilih Salah Satu Jenis Pembayaran: <br><br>
+                       	Pilih Salah Satu Jenis Pembayaran:
+                       	<hr>
 						<label class="radio">
-							<input type="radio" name="tipepembayaran" id="optionsRadios1" value="bank" {{$pembayaran!=null? ($pembayaran['tipepembayaran']=='bank'?'checked':''):'' }}>
+							<input type="radio" name="tipepembayaran" id="optionsRadios1" value="bank" {{$pembayaran!=null? ($pembayaran['tipepembayaran']=='bank'?'checked':''):'checked' }}>
 							  Transfer Bank<br>
-						</label><br><br>
+						</label><br>
 						@if($paypal->aktif)
 						<label class="radio">
 						  <input type="radio" name="tipepembayaran" id="optionsRadios2" value="paypal" {{$pembayaran!=null? ($pembayaran['tipepembayaran']=='paypal'?'checked':''):'' }}>
 						  Paypal
-						</label>
+						</label><br>
 						@endif
 						@if($creditcard->aktif)
 						<label class="radio">
 						  <input type="radio" name="tipepembayaran" id="optionsRadios2" value="creditcard" {{$pembayaran!=null? ($pembayaran['tipepembayaran']=='creditcard'?'checked':''):'' }}>
 						  Kartu Kredit
-						</label>
+						</label><br>
 						@endif
+
+						@if($doku_account)
+							@if($doku_account->status==1)
+							<label class="radio">
+							  <input type="radio" name="tipepembayaran" id="optionsRadios2" value="doku_payment" {{$pembayaran!=null? ($pembayaran['tipepembayaran']=='doku_payment'?'checked':''):'' }}>
+							  Doku MyShopCart
+							</label><br>
+							@endif
+						@endif
+
                        </div>
                        <div class="span8">
                        		<div class="well" style="display:none" id="bank">
@@ -71,6 +82,19 @@
 							@if($creditcard->aktif)
 							<div class="well" style="display:none" id="creditcard">
                        		</div>
+							@endif
+
+							@if($doku_account)
+								@if($doku_account->status==1)
+								<div class="well" style="display:none" id="doku_payment">
+									<img src="{{url('packages/yusidabcs/checkout/img/doku-myshopcart.png')}}" class="img">
+									<hr>
+									<p>DOKU MyShortCart is the easiest and fastest way to sell your services and products online. It offers a simpler way to sell directly to your audience via platforms like emails, Facebook, twitter, Instagram, blogs, or YouTube, by simply clicking on a link that will lead to a secure payment page. (<a href="http://doku.com/my-short-cart" target="_blank">Doku MyShopCart</a>)</p>
+									<hr>
+									Pembayaran tersedia via:<br><br>
+									<img src="{{url('packages/yusidabcs/checkout/img/doku-payment.png')}}" class="img">
+                       			</div>
+								@endif
 							@endif
                        </div>
                     </div>					

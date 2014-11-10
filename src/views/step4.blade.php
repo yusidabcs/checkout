@@ -183,6 +183,12 @@
 								@if($datapembayaran['tipepembayaran']=='creditcard')
 									<span class="label label-info">Via Credit Card</span>										
 								@endif
+								@if($datapembayaran['tipepembayaran']=='creditcard')
+									<span class="label label-info">Via Credit Card</span>										
+								@endif
+								@if($datapembayaran['tipepembayaran']=='doku_payment')
+									<img src="{{url('packages/yusidabcs/checkout/img/doku-myshopcart.png')}}">
+								@endif
 							</div>
 						</div>
 

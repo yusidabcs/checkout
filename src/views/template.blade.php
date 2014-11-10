@@ -167,8 +167,6 @@
 
     {{HTML::script("packages/yusidabcs/checkout/js/jquery-migrate-1.0.0.min.js")}}
 
-    {{HTML::script("packages/yusidabcs/checkout/js/jquery-ui-1.10.0.custom.min.js")}}
-
     {{HTML::script("packages/yusidabcs/checkout/js/jquery.ui.touch-punch.js")}}
 
     {{HTML::script("packages/yusidabcs/checkout/js/modernizr.js")}}

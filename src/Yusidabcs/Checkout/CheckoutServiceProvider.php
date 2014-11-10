@@ -14,6 +14,7 @@ class CheckoutServiceProvider extends ServiceProvider {
     {
         $this->package('yusidabcs/checkout');
         include __DIR__.'/../../routes.php';
+		include __DIR__.'/../../helper.php';
     }
 	/**
 	 * Register the service provider.

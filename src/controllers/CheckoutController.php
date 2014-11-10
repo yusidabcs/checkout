@@ -51,6 +51,10 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
      * @var      boolean
      */
     public $restful = true;
+    private $kodeOrder;
+    private $pelangganId;
+    private $datapengirim;
+    private $pembayaran;
     
     public function index()
     {   
@@ -124,8 +128,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
     }
 
 
-     function pengiriman()
-     {
+    public function pengiriman()
+    {
         //check session cart dan ekspedisi dan diskon                
         if ($this->setting->checkoutType==1) 
         {
@@ -189,7 +193,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('keywords',$this->setting->keyword);
         }
     }
-    function pembayaran(){
+    public function pembayaran(){
         if ( ! Sentry::check()){
             
             $user = Pelanggan::where('email','=',Input::get('email'))->whereIn('tipe', array(1,2))->where('akunId','=',$this->akunId)->get();
@@ -200,12 +204,15 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         if(Request::server('REQUEST_METHOD')=='POST'){
             Session::put('pengiriman', Input::all());               
         }        
+        Session::forget('pembayaran');
         $akun = OnlineAkun::where('akunId','=',$this->akunId)->get();      
+        $doku_account = \DokuAccount::where('akunId',$this->akunId)->first();
         $this->layout->content = View::make('checkout::step3')->with('cart' ,Shpcart::cart())
             ->with('banks',BankDefault::all())
             ->with('user',(Sentry::check() ? Sentry::getUser():''))
             ->with('banktrans' ,Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get())
             ->with('paypal' , $akun[0])
+            ->with('doku_account',$doku_account)
             ->with('creditcard', $akun[1])
             ->with('pembayaran',Session::has('pembayaran')? Session::get('pembayaran'):null)
             ->with('kontak', $this->setting);
@@ -215,7 +222,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('keywords',$this->setting->keyword);
     }
 
-    function konfirmasi()
+    public function konfirmasi()
     {
         if ($this->setting->checkoutType==1) 
         {
@@ -307,297 +314,21 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 return Redirect::to('checkout');
             }  
         }
-        
+
         //Generate kd Order
+        $this->kodeOrder = $this->generateKodeOrder();
+        $this->datapengirim = Session::get('pengiriman');
 
-        $pengaturan = $this->setting;        
-        
-        $awal = date('ymd');
-        $next_id ='';   
-
-        if ($pengaturan->checkoutType==1) 
+        if ($this->setting->checkoutType==1) 
         {
-            if(!is_null(Order::orderBy('created_at', 'desc')->first())){            
-                $model = Order::orderBy('created_at', 'desc')->first();
-                $next_id = $model->kodeOrder;      
-            }
-        }    
-        elseif ($pengaturan->checkoutType==2) 
+            $this->pembayaran = Session::get('pembayaran');
+        }
+        //save pelanggan
+        $this->pelangganId = $this->saveOrGetPelanggan($this->datapengirim);
+
+        if ($this->setting->checkoutType==1) 
         {
-            if(!is_null(Inquiry::orderBy('created_at', 'desc')->first())){            
-                $model = Inquiry::orderBy('created_at', 'desc')->first();
-                $next_id = $model->kodeInquiry;      
-            }   
-        }
-        
-        if($next_id!=''){
-            $next_id = substr($next_id,6,10);
-            $next_id ++;
-        }else{
-            $next_id= 1;
-        }
-        $nol = (str_repeat('0',(4-strlen($next_id))));
-        $kdOrder = $awal.$nol.$next_id;
-        
-
-        $datapengirim = Session::get('pengiriman');
-        if ($pengaturan->checkoutType==1) 
-        {
-            $pembayaran = Session::get('pembayaran');
-        }
-        
-        //cek guest atau pelanggan
-        if ( ! Sentry::check()){
-            //guest            
-            $datapengirim['kotanama'] = Kabupaten::find($datapengirim['kota'])->nama;
-
-            //$user = new Pelanggan;
-            $data = array(
-                'nama' => $datapengirim['nama'],
-                'email'    => $datapengirim['email'],
-                'password' => 'guest',
-                'kodepos' => $datapengirim['kodepos'],
-                'perusahaan' => '',
-                'telp' => $datapengirim['telp'],
-                'alamat' => $datapengirim['alamat'],
-                'negara' => $datapengirim['negara'],
-                'provinsi' => $datapengirim['provinsi'],
-                'kota' => $datapengirim['kota'],
-                'tglLahir' => '',
-                'catatan' => '',
-                'tags' => '',
-                'tipe' => 0,
-                'tanggalMasuk' => date("Y-m-d"),
-                'activated' => 1,
-                'akunId' => $this->akunId
-            );
-           $pelangganId =  DB::table('pelanggan')->insertGetId(
-                    array(
-                    'nama' => $datapengirim['nama'],
-                    'email'    => $datapengirim['email'],
-                    'password' => 'guest',
-                    'kodepos' => $datapengirim['kodepos'],
-                    'perusahaan' => '',
-                    'telp' => $datapengirim['telp'],
-                    'alamat' => $datapengirim['alamat'],
-                    'negara' => $datapengirim['negara'],
-                    'provinsi' => $datapengirim['provinsi'],
-                    'kota' => $datapengirim['kota'],
-                    'tglLahir' => '',
-                    'catatan' => '',
-                    'tags' => '',
-                    'tipe' => 0,
-                    'tanggalMasuk' => date("Y-m-d"),
-                    'activated' => 1,
-                    'akunId' => $this->akunId
-                )  
-            );
-            //$user = Sentry::getUserProvider()->create($data);
-            //$userGroup = Sentry::getGroupProvider()->findById(3);
-             // Assign the group to the user
-            //$user->addGroup($userGroup);            
-            //$pelangganId = $user->id;
-            //return $pelangganId;
-        }else{
-            //pelanggan
-            $pelangganId = Sentry::getUser()->id;
-        }
-        //ekspedisi 
-
-        //save order
-        if ($pengaturan->checkoutType==1) 
-        {
-            $ekspedisi =Session::get('ekspedisiId');
-            $jenispengiriman = Session::get('ekspedisiId');
-            $ongkosKirim = Session::get('ongkosKirim');
-            $potongan = 0;
-            
-            //get total order
-            if(!is_null(Session::get('diskonId'))){
-                if(Session::get('tipe')==1){
-                    $potongan = Session::get('besarPotongan');                
-                }else{
-                    $potongan = (Shpcart::cart()->total()*Session::get('besarPotongan')/100);
-                }
-            }
-            $total = (Shpcart::cart()->total() + Session::get('ongkosKirim')- $potongan) + Session::get('kodeunik');        
-            $total = $total + (Pajak::where('akunId','=',$this->akunId)->first()->status==0 ? 0 : $total * Pajak::where('akunId','=',$this->akunId)->first()->pajak / 100);
-            
-            $order = new Order;
-            $order->kodeOrder = $kdOrder;
-            $order->tanggalOrder = date('Y-m-d H:m:s');
-            $order->pelangganId = $pelangganId;
-            $order->total= $total;
-            $order->status= 0;
-            $order->jenisPengiriman = $jenispengiriman;
-            $order->ongkoskirim = Session::get('ongkosKirim');
-            if($datapengirim['statuspenerima']==0)
-            {
-                $order->nama = $datapengirim['nama'];
-                $order->telp = $datapengirim['telp'];
-                $order->alamat = $datapengirim['alamat'];
-                $order->kota = Kabupaten::find($datapengirim['kota'])->nama;    
-            }
-            else
-            {
-                $order->nama = $datapengirim['namapenerima'];
-                $order->telp = $datapengirim['telppenerima'];
-                $order->alamat = $datapengirim['alamatpenerima'];
-                $order->kota = Kabupaten::find($datapengirim['kotapenerima'])->nama;
-            }
-            $order->pesan = $datapengirim['pesan'];
-            $order->noResi = '';
-            $order->ekspedisiId = '';
-            if(Session::get('pembayaran')['tipepembayaran']=='bank'){
-                $pembayaran =1;
-            }else if(Session::get('pembayaran')['tipepembayaran']=='paypal'){
-                $pembayaran =2;           
-            }else if(Session::get('pembayaran')['tipepembayaran']=='creditcard'){
-                $pembayaran =3;
-            }            
-            
-            $order->jenisPembayaran = $pembayaran;
-            $order->diskonId = Session::has('diskonId') ? Session::get('diskonId') : '';
-            $order->akunId = $this->akunId;
-            $order->save();
-
-            if($order)
-            {
-                //cek diskon
-                if(Session::has('diskonId'))
-                {
-                    $diskonId = Session::get('diskonId');   
-                    $diskon = Diskon::find($diskonId);
-                    $diskon->klaim = $diskon->klaim +1;
-                    $diskon->save();
-                    if (Sentry::check()) 
-                    {
-                         HistoryDiskon::insertDiscountHistory($diskonId, Sentry::getUser()->id, $order->id);
-                    }
-                }
-                else
-                {
-                    $diskonId='';
-                }
-
-                //tambah det order
-                $cart_contents = Shpcart::cart()->contents();
-                foreach ($cart_contents as $key => $value) {
-                    $detorder = new DetailOrder;
-                    $detorder->orderId=$order->id;
-                    $detorder->opsiSkuId= is_null($value['opsiskuId']) ? '':$value['opsiskuId'];
-                    $detorder->produkId = $value['produkId'];
-                    $detorder->qty = $value['qty'];
-                    $detorder->hargaSatuan = $value['price'];
-                    $detorder->created_at = date('Y-m-d H:m:s');
-                    $detorder->updated_at = date('Y-m-d H:m:s');
-                    $detorder->save();
-                }
-                //kirim email konfirmasi ke email user
-                 $cart ='<table cellpadding="5"><tr>
-                                <td>No</td>
-                                <td>Nama Produk</td>
-                                <td>Varian</td>
-                                <td>Qty/Harga</td>        
-                                <td>Subtotal</td>
-                            </tr>';            
-                $cart = $cart.View::make('admin.order.listcart')->with('cart_contents', Shpcart::cart()->contents())->With('berat','0');
-                $cart = $cart."<tr>     
-                                <td colspan=4>
-                                    <h3 class='pull-right'>Total Orderan</h3>
-                                </td>
-                                <td colspan=2><h4>".jadiRupiah($order->total)."</h4></td>
-                            </tr></table>";
-                $bank = View::make('admin.pengaturan.bank')->with('banks', BankDefault::all()) ->with('banktrans', Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get());
-                Shpcart::cart()->destroy();
-                //kirim email order ke pelanggan
-                $template = Templateemail::find(1);
-                $data = array(
-                    'pelanggan'=> $order->nama,
-                    'toko' => $this->setting->nama,
-                    'kodeorder' => $order->kodeOrder,
-                    'tanggal' => $order->tanggalOrder,
-                    'cart' => $cart,
-                    'rekeningbank' =>$bank,
-                    'ekspedisi' =>$order->jenisPengiriman,
-                    'totalbelanja' =>$order->total
-                    );
-                $email = bind_to_template($data,$template->isi);            
-                $subject = bind_to_template($data,$template->judul);  
-                Mail::later(3,'emails.email',array('data'=>$email), function($message) use ($subject,$datapengirim)
-                {   
-                    $message->to($datapengirim['email'], $datapengirim['nama'])->subject($subject);
-                });
-                //kirik email konfirmasi ke email toko
-                $subject2 = 'Pemberitahuan Order -- '.bind_to_template($data,$template->judul);  
-                Mail::later(5,'emails.email',array('data'=>$email), function($message) use ($subject2,$pengaturan)
-                {   
-                    $message->to($pengaturan->emailAdmin, $pengaturan->nama)->subject($subject2);
-                });
-
-
-                $akun = OnlineAkun::where('akunId','=',$this->akunId)->get();
-                $paypalbutton = "";
-                if($order->jenisPembayaran==2){
-                    //buat button paypal.
-                    $paypal = new GoPayPal(THIRD_PARTY_CART);
-                    $paypal->sandbox = true;
-                    $paypal->openInNewWindow = true;
-                    $paypal->set('business', $akun[0]->acount);
-                    $paypal->set('currency_code', 'USD');
-                    $paypal->set('country', 'US');
-                    $paypal->set('return', URL::to('konfirmasiorder/'.$order->id));
-                    $paypal->set('cancel_return', URL::to('konfirmasiorder/'.$order->id));
-                    $paypal->set('notify_url', URL::to('konfirmasiorder/'.$order->id)); # rm must be 2, need to be hosted online
-                    $paypal->set('rm', 2); # return by POST
-                    $paypal->set('no_note', 0);
-                    $paypal->set('custom', md5(time()));
-                    $paypal->set('cbt', 'Return to our site to validate your payment!'); # caption override for "Return to Merchant" button                
-                    $paypal->set('handling_cart', 1); # this overide the individual items' handling "handling_x"
-                    $paypal->set('tax_cart', $akun[0]->fee);  
-                    $item = new GoPayPalCartItem();
-                    $item->set('item_name', 'Payment for order : #'.$order->kodeOrder);
-                    $item->set('item_number', '1');
-                    $total = $order->total;
-                    if($this->setting->mataUang == 1){
-                        $total =round($order->total / OnlineAkun::where('akunId','=',$this->akunId)->first()->rate); 
-                    }
-                    $item->set('amount', $total);
-                    $item->set('quantity', 1);
-                    $item->set('shipping', 0.1);
-                    $item->set('handling', 1); # this is overriden by "handling_cart"
-                    $paypal->addItem($item);
-                    # If you set your custom button here, PayPal Pay Now button will be displayed.
-                    $paypal->setButton('<button type="submit">Bayar Dengan Paypal - The safer, easier way to pay online!</button>');
-                    $paypalbutton=$paypal->html();      
-                }
-                            
-                Shpcart::cart()->destroy();
-                Session::forget('diskonId');
-                Session::forget('besarPotongan');
-                Session::forget('tipe');
-                Session::forget('pengiriman');
-                Session::forget('pembayaran');
-                Session::forget('ekspedisiId');
-                Session::forget('ongkosKirim');
-                Session::forget('kodeunik');            
-                
-                $this->layout->content = View::make('checkout::step5')->with('datapengirim' ,$datapengirim)
-                ->with('datapembayaran', $pembayaran)
-                ->with('order', $order)
-                ->with('banks' ,BankDefault::all())
-                ->with('banktrans', Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get())
-                ->with('paypal',  $akun[0])
-                ->with('creditcard' , $akun[1])
-                ->with('pengaturan', $this->setting)
-                ->with('paypalbutton', $paypalbutton)
-                ->with('kontak', $this->setting);
-
-                $this->layout->seo = View::make('checkout::seostuff')
-                ->with('title',"Checkout - Finish - ".$this->setting->nama)
-                ->with('description',$this->setting->deskripsi)
-                ->with('keywords',$this->setting->keyword);
-            }
+            return $this->saveAsOrder();
 
         }
         elseif ($pengaturan->checkoutType=2) 
@@ -661,6 +392,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                     'tanggal' => date("Y-m-d"),
                     'cart' => $cart
                     );
+                $pengirim = $this->datapengirim;
+                $pengaturan = $this->setting;
                 $email = bind_to_template($data,$template);            
                 $subject = bind_to_template($data,'Konfirmasi Inquiry');  
                 Mail::later(3,'emails.email',array('data'=>$email), function($message) use ($subject,$datapengirim)
@@ -692,10 +425,364 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 ->with('keywords',$this->setting->keyword);
             }
         }
-        
-        
-
-
     }
 
+    private function createDokuPayment($order){
+
+        $doku_account = \DokuAccount::where('akunId',$this->akunId)->first();
+        
+        $basket = '';
+        $basket .='Pembayaran Order #'.$order->kodeOrder.','.$order->total.',1,'.$order->total.';';
+        /*$total_product = 0;
+        foreach ($order->detailorder as $key => $value) {
+            $basket .=$value->produk->nama.','.$value->hargaSatuan.','.$value->qty.','.($value->hargaSatuan*$value->qty).';';
+            $total_product +=$value->hargaSatuan*$value->qty;
+        }
+        //check Administration fee,5000.00,1,5000.00
+        
+        $basket .='Kode Unik,'.($order->total - ($order->ongkosKirim+$total_product)).',1,'.($order->total - ($order->ongkosKirim+$total_product)).';';*/
+        $basket .='Administration fee,'.$doku_account->adminFee.',1,'.$doku_account->adminFee.';';
+
+        $total = number_format($order->total + 5000,2,'.','');
+
+        $word =sha1 ($total.$doku_account->sharedKey.$order->kodeOrder);
+
+        $form = '';
+        $form .='<FORM NAME="order" METHOD="Post" ACTION="https://apps.myshortcart.com/payment/request-payment/" target="_blank" >';
+        $form .='<input type=hidden name="BASKET" value="'.$basket.'">';
+        $form .='<input type=hidden name="STOREID" value="'.$doku_account->storeId.'">';
+        $form .='<input type=hidden name="TRANSIDMERCHANT" value="'.$order->kodeOrder.'">';
+        $form .='<input type=hidden name="AMOUNT" value="'.$total.'">';
+        $form .='<input type=hidden name="URL" value="'.url('/checkout/doku/payment').'">';
+        $form .='<input type=hidden name="WORDS" value="'.$word.'">';
+        $form .='<input type=hidden name="CNAME" value="'.$order->nama.'">';
+        $form .='<input type=hidden name="CEMAIL" value="'.$order->pelanggan->email.'">';
+        $form .='<input type=hidden name="CWPHONE" value="'.$order->telp.'">';
+        $form .='<input type=hidden name="CHPHONE" value="'.$order->telp.'">';
+        $form .='<input type=hidden name="CMPHONE" value="'.$order->telp.'">';
+        $form .='<input type=hidden name="CCAPHONE" value="'.$order->telp.'">';
+        $form .='<input type=hidden name="CADDRESS" value="'.$order->alamat.'">';
+        $form .='<input type=hidden name="SADDRESS" value="'.$order->alamat.'">';
+        $form .='<input type=hidden name="SZIPCODE" value="'.$order->pelanggan->kodepos.'">';
+        $form .='<input type=hidden name="SCITY" value="'.$order->pelanggan->city->nama.'">';
+        $form .='<input type=hidden name="SSTATE" value="'.$order->pelanggan->province->nama.'">';
+        $form .='<input type=hidden name="SCOUNTRY" value="1">';
+        $form .='<input type=hidden name="BIRTHDATE" value="'.$order->pelanggan->tglLahir.'">';
+        $form .='<input type=SUBMIT name="SAVE" value="Bayar Dengan Doku MyshopCart">';
+        $form .='</form>';
+        return $form;
+    }
+
+    private function generateKodeOrder()
+    {
+        $pengaturan = $this->setting;        
+        $awal = date('ymd');
+        $next_id ='';   
+        if ($pengaturan->checkoutType==1) 
+        {
+            $order = Order::orderBy('created_at', 'desc')->first();
+            if(!is_null($order)){            
+                $next_id = $order->kodeOrder;      
+            }
+        }    
+        elseif ($pengaturan->checkoutType==2) 
+        {
+            $inquiry = Inquiry::orderBy('created_at', 'desc')->first();
+            if(!is_null($inquiry)){            
+                $next_id = $inquiry->kodeInquiry;      
+            }   
+        }
+        
+        if($next_id!=''){
+            $next_id = substr($next_id,6,10);
+            $next_id ++;
+        }else{
+            $next_id= 1;
+        }
+        $nol = (str_repeat('0',(4-strlen($next_id))));
+        $kdOrder = $awal.$nol.$next_id;
+        return $kdOrder;
+    }
+
+    private function saveOrGetPelanggan($datapengirim)
+    {
+        if ( ! Sentry::check()){
+            //guest            
+            $datapengirim['kotanama'] = Kabupaten::remember(60*24)->find($datapengirim['kota'])->nama;
+            $pelangganId =  DB::table('pelanggan')->insertGetId(
+                    array(
+                    'nama' => $datapengirim['nama'],
+                    'email'    => $datapengirim['email'],
+                    'password' => 'guest',
+                    'kodepos' => $datapengirim['kodepos'],
+                    'perusahaan' => '',
+                    'telp' => $datapengirim['telp'],
+                    'alamat' => $datapengirim['alamat'],
+                    'negara' => $datapengirim['negara'],
+                    'provinsi' => $datapengirim['provinsi'],
+                    'kota' => $datapengirim['kota'],
+                    'tglLahir' => '',
+                    'catatan' => '',
+                    'tags' => '',
+                    'tipe' => 0,
+                    'tanggalMasuk' => date("Y-m-d"),
+                    'activated' => 1,
+                    'akunId' => $this->akunId
+                )  
+            );
+        }else{
+            $pelangganId = Sentry::getUser()->id;
+        }
+        return $pelangganId;
+    }
+
+    private function saveAsOrder(){
+        $ekspedisi =Session::get('ekspedisiId');
+        $jenispengiriman = Session::get('ekspedisiId');
+        $ongkosKirim = Session::get('ongkosKirim');
+        $potongan = 0;
+            
+        //get total order
+        if(!is_null(Session::get('diskonId'))){
+            if(Session::get('tipe')==1){
+                $potongan = Session::get('besarPotongan');                
+            }else{
+                $potongan = (Shpcart::cart()->total()*Session::get('besarPotongan')/100);
+            }
+        }
+        
+        $total = (Shpcart::cart()->total() + Session::get('ongkosKirim')- $potongan) + Session::get('kodeunik');        
+        $total = $total + (Pajak::where('akunId','=',$this->akunId)->first()->status==0 ? 0 : $total * Pajak::where('akunId','=',$this->akunId)->first()->pajak / 100);
+        
+        $order = new Order;
+        $order->kodeOrder = $this->kodeOrder;
+        $order->tanggalOrder = date('Y-m-d H:m:s');
+        $order->pelangganId = $this->pelangganId;
+        $order->total= $total;
+        $order->status= 0;
+        $order->jenisPengiriman = $jenispengiriman;
+        $order->ongkoskirim = Session::get('ongkosKirim');
+        if($this->datapengirim['statuspenerima']==0)
+        {
+            $order->nama = $this->datapengirim['nama'];
+            $order->telp = $this->datapengirim['telp'];
+            $order->alamat = $this->datapengirim['alamat'];
+            $order->kota = Kabupaten::remember(60*24)->find($this->datapengirim['kota'])->nama;
+        }
+        else
+        {
+            $order->nama = $this->datapengirim['namapenerima'];
+            $order->telp = $this->datapengirim['telppenerima'];
+            $order->alamat = $this->datapengirim['alamatpenerima'];
+            $order->kota = Kabupaten::remember(60*24)->find($this->datapengirim['kotapenerima'])->nama;
+        }
+        $order->pesan = $this->datapengirim['pesan'];
+        $order->noResi = '';
+        $order->ekspedisiId = '';
+        if(Session::get('pembayaran')['tipepembayaran']=='bank'){
+            $pembayaran =1;
+        }else if(Session::get('pembayaran')['tipepembayaran']=='paypal'){
+            $pembayaran =2;           
+        }else if(Session::get('pembayaran')['tipepembayaran']=='creditcard'){
+            $pembayaran =3;
+        }
+        else if(Session::get('pembayaran')['tipepembayaran']=='doku_payment'){
+            $pembayaran =4;
+        }            
+        
+        $order->jenisPembayaran = $pembayaran;
+        $order->diskonId = Session::has('diskonId') ? Session::get('diskonId') : '';
+        $order->akunId = $this->akunId;
+
+        $order->save();
+
+        if($order)
+        {
+            //cek diskon
+            if(Session::has('diskonId'))
+            {
+                $diskonId = Session::get('diskonId');   
+                $diskon = Diskon::find($diskonId);
+                $diskon->klaim = $diskon->klaim +1;
+                $diskon->save();
+                if (Sentry::check()) 
+                {
+                     HistoryDiskon::insertDiscountHistory($diskonId, Sentry::getUser()->id, $order->id);
+                }
+            }
+            else
+            {
+                $diskonId='';
+            }
+            
+            //tambah det order
+            $cart_contents = Shpcart::cart()->contents();
+            foreach ($cart_contents as $key => $value) {
+                $detorder = new DetailOrder;
+                $detorder->orderId=$order->id;
+                $detorder->opsiSkuId= is_null($value['opsiskuId']) ? '':$value['opsiskuId'];
+                $detorder->produkId = $value['produkId'];
+                $detorder->qty = $value['qty'];
+                $detorder->hargaSatuan = $value['price'];
+                $detorder->created_at = date('Y-m-d H:m:s');
+                $detorder->updated_at = date('Y-m-d H:m:s');
+                $detorder->save();
+            }
+
+            //pembayaran = paypal
+            $paypal_button = "";
+            $doku_payment = "";
+            $bank_default = null;
+            $bank_active = null;
+            $akun = null;
+            if($order->jenisPembayaran==2){
+
+                $paypal_button = $this->generatePaypalButton();   
+
+            }else if($order->jenisPembayaran==4){
+                
+                $doku_payment = $this->createDokuPayment($order);
+
+            }else{
+                //kirim email konfirmasi ke email user
+                $bank_default = \BankDefault::remember(60*24)->all();
+                $bank_active = \Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get();  
+            }
+            $cart_part = View::make('checkout::email.cart')
+                            ->with('cart_contents', Shpcart::cart()->contents())
+                            ->with('order',$order)
+                            ->with('berat','0');
+
+            $pembayaran_part = \View::make('checkout::email.pembayaran')
+                                    ->with('banks', $bank_default)
+                                    ->with('banktrans', $bank_active)
+                                    ->with('order',$order)
+                                    ->with('paypalbutton',$paypal_button)
+                                    ->with('doku_payment',$doku_payment);
+            
+            $this->sendEmailOrder($order,$cart_part,$pembayaran_part);
+            
+
+            $akun = OnlineAkun::where('akunId','=',$this->akunId)->get();
+               
+            Shpcart::cart()->destroy();
+            Session::forget('diskonId');
+            Session::forget('besarPotongan');
+            Session::forget('tipe');
+            Session::forget('pengiriman');
+            Session::forget('pembayaran');
+            Session::forget('ekspedisiId');
+            Session::forget('ongkosKirim');
+            Session::forget('kodeunik');  
+
+            $this->layout->content = View::make('checkout::step5')
+                ->with('datapengirim' ,$this->datapengirim)
+                ->with('datapembayaran', $pembayaran)
+                ->with('order', $order)
+                ->with('banks' ,$bank_default)
+                ->with('banktrans', $bank_active)
+                ->with('paypal',  $akun[0])
+                ->with('creditcard' , $akun[1])
+                ->with('pengaturan', $this->setting)
+                ->with('paypalbutton', $paypal_button)
+                ->with('doku_payment', $doku_payment)
+                ->with('kontak', $this->setting);
+
+            $this->layout->seo = View::make('checkout::seostuff')
+                ->with('title',"Checkout - Finish - ".$this->setting->nama)
+                ->with('description',$this->setting->deskripsi)
+                ->with('keywords',$this->setting->keyword);
+        }
+    }
+
+    private function generatePaypalButton($order){
+        //buat button paypal.
+        $paypal = new \GoPayPal(THIRD_PARTY_CART);
+        $paypal->sandbox = false;
+        $paypal->openInNewWindow = true;
+        $paypal->set('business', $akun[0]->acount);
+        $paypal->set('currency_code', 'USD');
+        $paypal->set('country', 'US');
+        $paypal->set('return', \URL::to('konfirmasiorder/'.$order->id));
+        $paypal->set('cancel_return', \URL::to('konfirmasiorder/'.$order->id));
+        $paypal->set('notify_url', \URL::to('konfirmasiorder/'.$order->id)); # rm must be 2, need to be hosted online
+        $paypal->set('rm', 2); # return by POST
+        $paypal->set('no_note', 0);
+        $paypal->set('custom', md5(time()));
+        $paypal->set('cbt', 'Return to our site to validate your payment!'); # caption override for "Return to Merchant" button                
+        $paypal->set('handling_cart', 1); # this overide the individual items' handling "handling_x"
+        $paypal->set('tax_cart', $akun[0]->fee);  
+        $item = new \GoPayPalCartItem();
+        $item->set('item_name', 'Payment for order : #'.$order->kodeOrder);
+        $item->set('item_number', '1');
+        $total = $order->total;
+        if($this->setting->mataUang == 1){
+            $total =round($order->total / \OnlineAkun::where('akunId','=',$this->akunId)->first()->rate); 
+        }
+        $item->set('amount', $total);
+        $item->set('quantity', 1);
+        $item->set('shipping', 0.1);
+        $item->set('handling', 1); # this is overriden by "handling_cart"
+        $paypal->addItem($item);
+        # If you set your custom button here, PayPal Pay Now button will be displayed.
+        $paypal->setButton('<button type="submit">Bayar Dengan Paypal - The safer, easier way to pay online!</button>');
+        
+        return $paypal->html();
+    }
+
+    private function sendEmailOrder($order,$cart_part,$pembayaran_part){
+        $data = array(
+            'pelanggan'=> $order->nama,
+            'pelangganalamat'=> $order->alamat,
+            'pelangganphone'=> $order->telp,
+            'toko' => $this->setting->nama,
+            'kodeorder' => $order->kodeOrder,
+            'tanggal' => date("d F Y",strtotime($order->tanggalOrder)).' '.date("g:ha",strtotime($order->tanggalOrder)),
+            'cart' => $cart_part,
+            'ekspedisi' =>$order->jenisPengiriman,
+            'totalbelanja' =>$order->total,
+            'phone' => $this->setting->telepon,
+            'handphone' => $this->setting->hp,
+            'email' => $this->setting->email,
+            'pembayaran' => $pembayaran_part
+            );
+        
+        $template_email = \Templateemail::where('akunId','=',$this->akunId)->where('no','=',1)->first();
+        $template = \View::make('checkout::email.main');
+        
+        $pengirim = $this->datapengirim;
+        $pengaturan = $this->setting;
+        $datapengirim['fromemail']= $this->setting->email;
+        $datapengirim['fromtoko']= $this->setting->nama;
+
+        $email = bind_to_template($data,$template);
+
+        $subject = 'Pemberitahuan Order -- '.bind_to_template($data,$template_email->judul); 
+        Mail::later(3,'emails.email',array('data'=>$email), function($message) use ($subject,$pengirim)
+        {   
+            $message->to($pengirim['email'], $pengirim['nama'])->subject($subject);
+        });
+        //kirik email konfirmasi ke email toko
+        $subject2 = 'Pemberitahuan Order -- '.bind_to_template($data,$template_email->judul);  
+        Mail::later(5,'emails.email',array('data'=>$email), function($message) use ($subject2,$pengaturan)
+        {   
+            $message->to($pengaturan->emailAdmin, $pengaturan->nama)->subject($subject2);
+        });
+    }
+    public function getProvinsi($id)
+    {
+        $pro = \Negara::remember(5)->find($id)->provinsi;
+        return \Response::json($pro);
+    }
+    public function getKabupaten($id)
+    {
+        $pro = \Provinsi::remember(5)->find($id)->kabupaten;
+        return \Response::json($pro);
+    }
+
+    public function getKabupatenByName($name)
+    {
+        $pro = \Kabupaten::select(array(DB::raw('nama as label')))->where('nama','like','%'.$name.'%')->get();
+        return $pro;
+    }
 }

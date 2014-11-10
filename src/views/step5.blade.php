@@ -28,6 +28,7 @@
 		</div>
 		<div class="row-fluid box">
 			<div class="span12 box-content">
+				<h2>Pembayaran:</h2>
 				@if($datapembayaran=='1')
 						<div class="span12">
 							<div class="well">
@@ -74,7 +75,14 @@
 					@endif
 					@if($datapembayaran=='3')
 						Via Credit Card
-					@endif	
+					@endif
+
+					@if($datapembayaran=='4')
+						<img src="{{url('packages/yusidabcs/checkout/img/doku-myshopcart.png')}}" class="img">
+						<hr>
+						<p>Silakan melakukan pembayaran melalui Doku MyShopCart. Transaksi ini akan di batalkan jika dalam 1x24 jam belum dilakukan pembayaran.</p>
+						{{$doku_payment}}
+					@endif
 			</div>
 		</div>
 		</div>
