@@ -9,31 +9,6 @@
         </style>
     </head>
     <body yahoo bgcolor="#fff">
-        <table width="100%" bgcolor="#fff" border="0" cellpadding="0" cellspacing="0">
-            <tr>
-                <td>
-                    <table class="content" align="center" cellpadding="0" cellspacing="0" border="0">
-                        <tr>
-                            <td>
-                                <p>Hallo @{{pelanggan}},</p>
-
-                                <p>Terimakasih telah berbelanja di @{{toko}}. <br>
-                                Detail order anda <hr>
-                                KodeOrder: <strong>#@{{kodeorder}}</strong> <br>
-                                Tanggal Order: @{{tanggal}}</p>
-                                <p>Detail Belanja :</p>
-                                @{{cart}}
-                                <hr>
-                                Pengiriman : @{{ekspedisi}}
-                                <hr>
-                                @{{pembayaran}}
-                                <hr>
-                                <br></p> Salam Hangat, @{{toko}}</p>
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-            </tr>
-        </table>
+        {{$data}}
     </body>
 </html>

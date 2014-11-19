@@ -59,7 +59,6 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
     public function index()
     {   
         $pengaturan=$this->setting;      
-
         if ($pengaturan->checkoutType==1) 
         {
             Session::forget('pengiriman');
@@ -443,7 +442,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         $basket .='Kode Unik,'.($order->total - ($order->ongkosKirim+$total_product)).',1,'.($order->total - ($order->ongkosKirim+$total_product)).';';*/
         $basket .='Administration fee,'.$doku_account->adminFee.',1,'.$doku_account->adminFee.';';
 
-        $total = number_format($order->total + 5000,2,'.','');
+        $total = number_format($order->total + $doku_account->adminFee,2,'.','');
 
         $word =sha1 ($total.$doku_account->sharedKey.$order->kodeOrder);
 
@@ -645,7 +644,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
 
             }else{
                 //kirim email konfirmasi ke email user
-                $bank_default = \BankDefault::remember(60*24)->all();
+                $bank_default = \BankDefault::remember(60*24)->get();
                 $bank_active = \Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get();  
             }
             $cart_part = View::make('checkout::email.cart')
@@ -744,10 +743,12 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             'phone' => $this->setting->telepon,
             'handphone' => $this->setting->hp,
             'email' => $this->setting->email,
-            'pembayaran' => $pembayaran_part
+            'pembayaran' => $pembayaran_part,
+            'rekeningbank' => ''
             );
         
         $template_email = \Templateemail::where('akunId','=',$this->akunId)->where('no','=',1)->first();
+
         $template = \View::make('checkout::email.main');
         
         $pengirim = $this->datapengirim;
@@ -755,8 +756,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         $datapengirim['fromemail']= $this->setting->email;
         $datapengirim['fromtoko']= $this->setting->nama;
 
-        $email = bind_to_template($data,$template);
-
+        $email = bind_to_template($data,$template_email->isi);
         $subject = 'Pemberitahuan Order -- '.bind_to_template($data,$template_email->judul); 
         Mail::later(3,'emails.email',array('data'=>$email), function($message) use ($subject,$pengirim)
         {   

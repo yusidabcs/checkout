@@ -61,6 +61,7 @@
 	<h3>Pembayaran yg Dipilih : Doku MyShopCart</h3>
 	<p>Silakan melakukan pembayaran melalui Doku MyShopCart. Transaksi ini akan di batalkan jika dalam 1x24 jam belum dilakukan pembayaran.</p>
 	{{$doku_payment}}
+	<small><em>* Jumlah pembayaran mungkin di kenakan admin fee sesuai kebijakan toko.</em></small>
 @endif
 
 @if($order->jenisPembayaran==6)

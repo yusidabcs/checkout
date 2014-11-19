@@ -8,7 +8,7 @@ class DokuVerifyController extends \Illuminate\Routing\Controllers\Controller {
 		$totalamount = \Input::get('AMOUNT');
 		$storeid = \Input::get('STOREID');
 		$status = false;
-		if ($_SERVER['REMOTE_ADDR'] !='103.10.128.11') {
+		if ($_SERVER['REMOTE_ADDR'] =='103.10.128.11') {
 			// 2.2 Cross check with MYSHORTCART Database Table
 			// $true = 1 : transaction found, 0 : transaction not found
 			$order = \Order::where('kodeOrder',$transidmerchant)->first();
