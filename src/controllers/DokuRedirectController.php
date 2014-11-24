@@ -1,5 +1,5 @@
 <?php namespace Yusidabcs\Checkout;
-
+require app_path().'/GoPayPal.class.php';
 class DokuRedirectController extends \Illuminate\Routing\Controllers\Controller {
 	
 	public function store(){
@@ -23,6 +23,7 @@ class DokuRedirectController extends \Illuminate\Routing\Controllers\Controller 
 				//update order ke pembayaran diterima
 				$order->status = 2;
 				$order->save();
+				$detail_konfirmasi = '<p>Doku MyshopCart Detail:<br> MerchantId : '.$transidmerchant.'<br> Total : '.$amount.'<br> Tanggal : '.$transdate.'</p>';
 				$setting = \Pengaturan::where('akunId','=',$order->akunId)->first();
                 $data = array(
                     'pelanggan'=> $order->nama,
@@ -39,7 +40,8 @@ class DokuRedirectController extends \Illuminate\Routing\Controllers\Controller 
                     'namaEkspedisi' => $order->jenisPengiriman,
                     'noResi' => $order->noResi,
                     'tujuanPengiriman' => $order->alamat.' - '.$order->kota,
-                    'linkRegistrasi' => \URL::to('member/create')
+                    'linkRegistrasi' => \URL::to('member/create'),
+                    'detailKonfirmasi' => $detail_konfirmasi
                 );
                 $order->fromEmail = $setting->email;
                 $order->fromtoko = $setting->nama;
@@ -60,4 +62,5 @@ class DokuRedirectController extends \Illuminate\Routing\Controllers\Controller 
 		return \Redirect::to($url)
 			->with('message','Success Update Order');
 	}
+
 }
