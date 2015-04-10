@@ -26,7 +26,7 @@
 	<tr style="margin: 0;padding: 0;">
 	  <td colspan="3" style="margin: 0;padding: 5px;border: 0;"> </td>
 	  <td colspan="1" style="margin: 0;padding: 5px;border: 1px solid black;border-right: 0;text-align: right;">Ongkos Kirim</td>
-	  <td style="margin: 0;padding: 10px;border: 1px solid black"><div id="subtotal" style="margin: 0;padding: 0;">{{ price_format($order->ongkoskirim).' ('.($berat/100).' kg)'}}</div></td>
+	  <td style="margin: 0;padding: 10px;border: 1px solid black"><div id="subtotal" style="margin: 0;padding: 0;">{{ price_format($order->ongkoskirim).' ('.($berat/100).' gram)'}}</div></td>
 	</tr>
 	<tr style="margin: 0;padding: 0;">
 	  <td colspan="3" class="blank" style="margin: 0;padding: 5px;border: 0;"> </td>

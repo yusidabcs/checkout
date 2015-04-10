@@ -1,17 +1,8 @@
 @section('content')
 <div id="demos">
-	<h2>Finish - Konfirmasi Order</h2>
 	<br>
+	<h1 class="text-center">Finish - Informasi Order</h2>
 	<div id="psteps_horiz_layout" class="pf-form">
-		<div class="row-fluid">
-			<div class="span12">
-				<div class="step-title btn disabled"><span class="step-order">1.</span> <span class="step-name hidden-phone">Rincian Belanja</span></div>
-				<div class="step-title btn disabled"><span class="step-order">2.</span> <span class="step-name hidden-phone">Data Pembeli Dan Pengiriman</span></div>
-				<div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
-				<div class="step-title btn disabled"><span class="step-order">4.</span> <span class="step-name hidden-phone">Ringkasan Order</span></div>
-				<div class="step-title btn btn-success"><span class="step-order">5.</span> <span class="step-name">Selesai</span></div>
-			</div>
-		</div>
 		<div class="row-fluid box">
 			<div class="span12 box-content">
 				<div class="span12">
@@ -77,12 +68,20 @@
 						Via Credit Card
 					@endif
 
-					@if($datapembayaran=='4')
+					@if($datapembayaran=='5')
 						<img src="{{url('packages/yusidabcs/checkout/img/doku-myshopcart.png')}}" class="img">
 						<hr>
 						<p>Silakan melakukan pembayaran melalui Doku MyShopCart. Transaksi ini akan di batalkan jika dalam 1x24 jam belum dilakukan pembayaran.</p>
 						{{$doku_payment}}
 					@endif
+
+					@if($datapembayaran=='4')
+
+						<p>Silakan melakukan pembayaran dengan iPaymu.Klik tombol "iPaymu" di bawah untuk melanjutkan proses pembayaran.</p>
+
+						<a class="btn btn-info" href="{{URL::to('ipaymu/'.$order->id)}}" target="_blank">Bayar dengan iPaymu</a>
+
+					@endif	
 			</div>
 		</div>
 		</div>

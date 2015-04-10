@@ -10,50 +10,142 @@ Number.prototype.formatMoney = function(decPlaces, thouSeparator, decSeparator) 
 };
 var URL = window.location.protocol + "//" + window.location.host;
 var lod ="<img src='"+URL+"/img/ajax-loader.gif' id='lod'>";
+
 $(document).ready(function(){
-    $('#negara').change(function(){
-        $('#provinsi').attr('disabled', 'true');
+
+    $('[data-select="chosen"]').chosen({width: "95%"});
+    $('#pengiriman-negara').on('change',function(){
+        $('#pengiriman-provinsi').attr('disabled', 'true');
         id=this.value;
+        NProgress.start();
         if(id!=''){         
-            $(this).parent().append(lod);
             $(this).attr("disabled",true);
             $.ajax({
-              url: URL+'/admin/provinsi/list/'+id,          
+              url: URL+'/provinsi/'+id,          
               type: 'get',
-            }).done(function(data){     
-                $('#provinsi').find('option').remove();                     
-            }).done(function(data){
-                $('#provinsi').removeAttr('disabled');
-                $('#provinsi').append(data);
-                $('#lod').remove();
-                $('#negara').attr("disabled",false);
+            }).success(function(data){     
+
+                $('#pengiriman-provinsi').find('option').remove();                     
+
+                var $option = $("<option/>").attr("value", '').text('Pilih Provinsi');
+                $('#pengiriman-provinsi').append($option);
+                
+                $(data).each(function (index, o) {    
+                    var $option = $("<option/>").attr("value", o.id).text(o.nama);
+                    $('#pengiriman-provinsi').append($option);
+                });
+                $('#pengiriman-provinsi').removeAttr('disabled').trigger("liszt:updated");
+
             }).error(function(){
-                $('#provinsi').removeAttr('disabled');
-                $('#lod').remove();
-                $('#negara').attr("disabled",false);
+                $('#pengiriman-provinsi').removeAttr('disabled').trigger("liszt:updated");
+            }).complete(function(){
+                NProgress.done();
+            });
+        }
+    });
+    $('#pengiriman-provinsi').on('change',function(){
+            id=this.value;
+            if(id!=''){         
+                $(this).attr("disabled",true);
+                NProgress.start();
+                $.ajax({
+                  url: URL+'/kabupaten/'+id,          
+                  type: 'get',
+                }).success(function(data){     
+                    $('#pengiriman-kota').find('option').remove();                     
+
+                    var $option = $("<option/>").attr("value", '').text('Pilih Kota');
+                    $('#pengiriman-kota').append($option);
+                    
+                    $(data).each(function (index, o) {    
+                        var $option = $("<option/>").attr("value", o.id).text(o.nama);
+                        $('#pengiriman-kota').append($option);
+                    });
+
+                    $('#pengiriman-kota').removeAttr('disabled').trigger("liszt:updated");
+
+                }).error(function(){
+                    $('#pengiriman-kota').removeAttr('disabled').trigger("liszt:updated");
+                }).complete(function(){
+                    NProgress.done();
+                });
+            }
+        });
+
+        $('#pengiriman-kota').on('change',function(){
+            $('#ekspedisibtn').trigger('click');
+        });
+
+    $('#negara').change(function(){
+        
+        if(this.value == '')
+            return;
+
+        id=this.value;
+        $('#provinsi').attr('disabled', 'true').trigger("liszt:updated");
+
+        if(id!=''){         
+            $(this).attr("disabled",true).trigger("liszt:updated");
+
+            NProgress.start();
+            $.ajax({
+              url: URL+'/provinsi/'+id,          
+              type: 'get',
+            }).success(function(data){     
+
+                $('#provinsi').find('option').remove();                     
+
+                var $option = $("<option/>").attr("value", '').text('Pilih Provinsi');
+                $('#provinsi').append($option);
+                
+                $(data).each(function (index, o) {    
+                    var $option = $("<option/>").attr("value", o.id).text(o.nama);
+                    $('#provinsi').append($option);
+                });
+                $('#provinsi').removeAttr('disabled').trigger("liszt:updated");
+                $('#negara').removeAttr("disabled").trigger("liszt:updated");
+
+                NProgress.done();
+            }).error(function(){
+                
+                $('#provinsi').removeAttr('disabled').trigger("liszt:updated");
+                $('#negara').removeAttr("disabled").trigger("liszt:updated");
+                NProgress.done();
             });
         }
     });
     $('#negarapenerima').change(function(){        
-        $('#provinsipenerima').attr('disabled', 'true');
+        if(this.value == '')
+            return;
+
         id=this.value;
+        $('#provinsipenerima').attr('disabled', 'true').trigger("liszt:updated");
         if(id!=''){         
-            $(this).parent().append(lod);
-            $(this).attr("disabled",true);
+            $(this).attr("disabled",true).trigger("liszt:updated");
+            NProgress.start();
             $.ajax({
-              url: URL+'/admin/provinsi/list/'+id,          
+              url: URL+'/provinsi/'+id,          
               type: 'get',
-            }).done(function(data){     
+            }).success(function(data){     
+
                 $('#provinsipenerima').find('option').remove();                     
-            }).done(function(data){
-                $('#provinsipenerima').removeAttr('disabled');
-                $('#provinsipenerima').append(data);
-                $('#lod').remove();
-                $('#negarapenerima').attr("disabled",false);
+
+                var $option = $("<option/>").attr("value", '').text('Pilih Provinsi');
+                $('#provinsipenerima').append($option);
+                
+                $(data).each(function (index, o) {    
+                    var $option = $("<option/>").attr("value", o.id).text(o.nama);
+                    $('#provinsipenerima').append($option);
+                });
+                $('#provinsipenerima').removeAttr('disabled').trigger("liszt:updated");
+                $('#negarapenerima').removeAttr("disabled").trigger("liszt:updated");
+                NProgress.done();
             }).error(function(){
-                $('#negarapenerima').removeAttr('disabled');                
-                $('#lod').remove();
-                $('#provinsipenerima').attr("disabled",false);
+                
+                $('#provinsipenerima').removeAttr('disabled').trigger("liszt:updated");
+                $('#negarapenerima').removeAttr("disabled").trigger("liszt:updated");
+                NProgress.done();
+
             });
         }
     });
@@ -96,52 +188,127 @@ $(document).ready(function(){
     });
 
     $('#provinsi').change(function(){
-        $('#kota').attr('disabled', 'true');
+
+        if(this.value == '')
+            return;
+
+        $('#kota').attr('disabled', 'true').trigger("liszt:updated");
         id=this.value;
         if(id!=''){     
-            $(this).parent().append(lod);
-            $(this).attr("disabled",true);
+
+            $(this).attr("disabled",true).trigger("liszt:updated");
+
             $.ajax({
-              url: URL+'/admin/kabupaten/list/'+id,     
+              
+              url: URL+'/kabupaten/'+id,     
               type: 'get',
-            }).done(function(data){     
+
+            }).success(function(data){     
+
                 $('#kota').find('option').remove();                     
-            }).done(function(data){
-                $('#kota').removeAttr('disabled');
-                $('#kota').append(data);
-                $('#lod').remove();
-                $('#provinsi').attr("disabled",false);
+
+                var $option = $("<option/>").attr("value", '').text('Pilih kota');
+                $('#kota').append($option);
+                
+                $(data).each(function (index, o) {    
+                    var $option = $("<option/>").attr("value", o.id).text(o.nama);
+                    $('#kota').append($option);
+                });
+                $('#kota').removeAttr('disabled').trigger("liszt:updated");
+                $('#provinsi').removeAttr("disabled").trigger("liszt:updated");
+
             }).error(function(){
-                $('#kota').removeAttr('disabled');
-                $('#lod').remove();
-                $('#provinsi').attr("disabled",false);
-            })
+                
+                $('#provinsi').removeAttr('disabled').trigger("liszt:updated");
+                $('#kota').removeAttr("disabled").trigger("liszt:updated");
+
+            });
         }
     });
     $('#provinsipenerima').change(function(){
-        $(this).parent().append(lod);
-        $('#kotapenerima').attr('disabled', 'true');
+        if(this.value == '')
+            return;
+
+        $('#kotapenerima').attr('disabled', 'true').trigger("liszt:updated");
         id=this.value;
         if(id!=''){     
-            $(this).attr("disabled",true);
+
+            $(this).attr("disabled",true).trigger("liszt:updated");
+
             $.ajax({
-              url: URL+'/admin/kabupaten/list/'+id,     
+              
+              url: URL+'/kabupaten/'+id,     
               type: 'get',
-            }).done(function(data){     
+
+            }).success(function(data){     
+
                 $('#kotapenerima').find('option').remove();                     
-            }).done(function(data){
-                $('#kotapenerima').removeAttr('disabled');
-                $('#kotapenerima').append(data);
-                $('#lod').remove();
-                $('#provinsipenerima').attr("disabled",false);
+
+                var $option = $("<option/>").attr("value", '').text('Pilih kota');
+                $('#kotapenerima').append($option);
+                
+                $(data).each(function (index, o) {    
+                    var $option = $("<option/>").attr("value", o.id).text(o.nama);
+                    $('#kotapenerima').append($option);
+                });
+                $('#kotapenerima').removeAttr('disabled').trigger("liszt:updated");
+                $('#provinsipenerima').removeAttr("disabled").trigger("liszt:updated");
+
             }).error(function(){
-                $('#kotapenerima').removeAttr('disabled');
-                $('#lod').remove();
-                $('#provinsipenerima').attr("disabled",false);
+                
+                $('#provinsipenerima').removeAttr('disabled').trigger("liszt:updated");
+                $('#kotapenerima').removeAttr("disabled").trigger("liszt:updated");
+
             });
         }
     });
 
+    $('#kota , #kotapenerima').change(function(){
+
+        id = this.value;
+
+        var status = $(this).attr('data-status');
+        console.log(status);
+        if(status!=1){
+            return;
+        }
+        
+        NProgress.start();
+        $('[name="pengiriman"]').find('[type="submit"]').button('loading');
+
+        $.ajax({
+              url: URL+'/checkout/update-ekspedisi/'+id,     
+              type: 'get',
+
+            }).success(function(data){
+
+
+                if(data.not_found){
+                    $('#kota option , #kotapenerima option').prop('selected', function() {
+                        return this.defaultSelected;
+                    });
+                    $('#kota option, #kotapenerima option').trigger("liszt:updated");
+                }
+                $('#result_ekspedisi').remove();
+                $('#ekspedisiplace').html(data.html);
+
+                $('#update-ekspedisi').modal({
+                    backdrop : 'static',
+                    keyboard : false
+                });
+
+                $('[name="pengiriman"]').find('[type="submit"]').button('reset');
+                    
+            }).error(function(xhr, ajaxOptions, thrownError) {
+                if(xhr.status==500){
+                    noty({"text":'Maaf, terjadi kesalahan dalam pencarian expedisi. Periksa koneksi internet anda!',"layout":"center","type":'error','speed': 100});       
+                }else{
+                    noty({"text":'Maaf, terjadi kesalahan. Silakan Coba lagi!',"layout":"center","type":'error','speed': 100});       
+                }
+                $('[name="pengiriman"]').find('[type="submit"]').button('reset');
+            }); 
+
+    });
     $('#addorder').submit(function(){
         var pathArray = window.location.pathname.split( '/' );
         var id = pathArray[pathArray.length-1].split('-');
@@ -421,13 +588,14 @@ $(document).ready(function(){
     //js pilih provinsi
     $('#ekspedisibtn').click(function(){    
             var btn = $('#ekspedisibtn');
-            tujuan = $('#tujuan').val();
+            tujuan = $("#pengiriman-kota option:selected").text();
             tampung = $('#ekspedisilist').val();
             if(tujuan !=''){
                 $('#ekspedisiplace').slideUp(100,function(){
                     btn.button('loading');
+                    NProgress.start();
                     $.ajax({
-                        url: URL+'/cart/checkekspedisi/'+tujuan ,           
+                        url: URL+'/checkout/checkekspedisi/'+tujuan ,           
                         type: 'get'
                     }).done(function(data){ 
                         $('#ekspedisiplace').slideDown(100);
@@ -456,6 +624,8 @@ $(document).ready(function(){
                         $('#statusEkspedisi').val('0');
                         $('#ekspedisitext').html("Rp. 0");
                         btn.button('reset');
+                    }).complete(function(){
+                        NProgress.done();
                     }); 
                 });
                 
@@ -466,23 +636,59 @@ $(document).ready(function(){
     $('body').on('click','input[name="ekspedisilist"]',function(){
         var btn = $('#form1');
         btn.button('loading');
-        tujuan = $('#tujuan').val();
+        NProgress.start();
+        if($('#pengiriman-negara').length){
+            
+            negara = $('#pengiriman-negara option:selected').val();
+
+        }else if($('#negara').length){
+            negara = $('#negara option:selected').val();
+        }
+
+        if($('#pengiriman-provinsi').length){
+            provinsi = $('#pengiriman-provinsi option:selected').val();   
+        }else if($('#negara').length){
+            provinsi = $('#provinsi option:selected').val();
+        }
+
+        if($('#pengiriman-kota').length){
+            kota = $('#pengiriman-kota option:selected').val();  
+            tujuan = $('#pengiriman-kota option:selected').text();
+        }else if($('#negara').length){
+            kota = $('#kota option:selected').val();
+            tujuan = $('#kota option:selected').text();
+        }
+        
+        
+        
+        
+
         var total = $('#subtotalcart').html();
         format = total.replace(/[0-9]/g, '');
         format = format.replace(/\./g,"");
         format = format.replace(/<(?:.|\n)*?>/gm, '');
         value = this.value;
         eks = this.value.split(';');
+        
+        $('#ekspedisiname').html(eks[0]);
         $('#ekspedisitext').html(format+' '+parseInt(eks[1]).formatMoney(0,'.'));
+
         calculate();
         $.ajax({
-            url: URL+'/cart/addekspedisi/'+this.value,          
+            url: URL+'/checkout/addekspedisi/'+this.value,          
             type: 'get',
-            data : {tujuan:tujuan}
+            data : {
+                tujuan : tujuan,
+                negara : negara,
+                provinsi : provinsi,
+                kota : kota
+            }
         }).done(function(data){
             $('#statusEkspedisi').val(1);
             $('#ekspedisilist').val(value);
             btn.button('reset');
+            $('#update-ekspedisi').modal('hide');
+            NProgress.done();
         });
     });
 
@@ -807,35 +1013,35 @@ function close_dialog(){
     $( "#cart_dialog" ).dialog('close');
 }
 $(function() {
-	$("#tujuan").autocomplete({
-	    //source: data,
-	    source: function( request, response ) {
-    		//var keyword = $(this).val();
-    		$.ajax({
-    		    url: URL+'/searchkotabyname/'+request.term,      
-    		    type: 'get',
-    		    success: function(data) {
-    		        //$('input.suggest-user').removeClass('ui-autocomplete-loading');  // hide loading image            {
-    		        response(data);
-    		    },
-    		    error: function(data) {
-    		        //$('input.suggest-user').removeClass('ui-autocomplete-loading');  
-    		    }
-    		});
-	    },
-	    focus: function(event, ui) {
-		    // prevent autocomplete from updating the textbox
-		    event.preventDefault();
-    		// manually update the textbox
-    		$(this).val(ui.item.label);
-	    },
-	    select: function(event, ui) {
-    		// prevent autocomplete from updating the textbox
-    		event.preventDefault();
-    		// manually update the textbox and hidden field
-    		$(this).val(ui.item.label);
-    		$("#tujuan-value").val(ui.item.label);
+    $("#tujuan").autocomplete({
+        //source: data,
+        source: function( request, response ) {
+            //var keyword = $(this).val();
+            $.ajax({
+                url: URL+'/searchkotabyname/'+request.term,      
+                type: 'get',
+                success: function(data) {
+                    //$('input.suggest-user').removeClass('ui-autocomplete-loading');  // hide loading image            {
+                    response(data);
+                },
+                error: function(data) {
+                    //$('input.suggest-user').removeClass('ui-autocomplete-loading');  
+                }
+            });
+        },
+        focus: function(event, ui) {
+            // prevent autocomplete from updating the textbox
+            event.preventDefault();
+            // manually update the textbox
+            $(this).val(ui.item.label);
+        },
+        select: function(event, ui) {
+            // prevent autocomplete from updating the textbox
+            event.preventDefault();
+            // manually update the textbox and hidden field
+            $(this).val(ui.item.label);
+            $("#tujuan-value").val(ui.item.label);
             $('#ekspedisibtn').trigger('click');
-	    }
-	});
+        }
+    });
 });

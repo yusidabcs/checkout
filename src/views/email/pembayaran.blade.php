@@ -57,10 +57,16 @@
 @endif
 
 
-@if($order->jenisPembayaran==4)
+@if($order->jenisPembayaran==5)
 	<h3>Pembayaran yg Dipilih : Doku MyShopCart</h3>
 	<p>Silakan melakukan pembayaran melalui Doku MyShopCart. Transaksi ini akan di batalkan jika dalam 1x24 jam belum dilakukan pembayaran.</p>
 	{{$doku_payment}}
+	<small><em>* Jumlah pembayaran mungkin di kenakan admin fee sesuai kebijakan toko.</em></small>
+@endif
+@if($order->jenisPembayaran==4)
+	<h3>Pembayaran yg Dipilih : IpayMu</h3>
+	<p>Silakan melakukan pembayaran melalui Ipaymu. Transaksi ini akan di batalkan jika dalam 1x24 jam belum dilakukan pembayaran.</p>
+	<a class="btn btn-info" href="{{URL::to('ipaymu/'.$order->id)}}" target="_blank">Bayar dengan iPaymu</a>
 	<small><em>* Jumlah pembayaran mungkin di kenakan admin fee sesuai kebijakan toko.</em></small>
 @endif
 

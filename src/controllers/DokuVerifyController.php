@@ -15,7 +15,7 @@ class DokuVerifyController extends \Illuminate\Routing\Controllers\Controller {
 			if($order){
 				//check amount is valid + admin ofcourse!
 				$doku_akun = \DokuAccount::where('akunId',$order->akunId)->first();
-				$total_order = $order->total + $doku_akun->adminFee;
+				$total_order = $order->total + $order->dokuFee;
 
 				if($totalamount==$total_order){
 					$status = true;

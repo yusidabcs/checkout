@@ -58,7 +58,10 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
     
     public function index()
     {   
-        $pengaturan=$this->setting;      
+        $pengaturan=$this->setting;
+        $negara = \Negara::remember(24*60)->get();
+        $provinsi = \Provinsi::remember(24*60)->get();
+        $kota = \Kabupaten::remember(24*60)->get();
         if ($pengaturan->checkoutType==1) 
         {
             Session::forget('pengiriman');
@@ -105,7 +108,11 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 ->with('diskon',$diskon)
                 ->with('kontak', $this->setting)
                 ->with('akun',Akun::find($this->akunId))
-                ->with('pajak',Pajak::where('akunId','=',$this->akunId)->first());
+                ->with('pajak',Pajak::where('akunId','=',$this->akunId)->first())
+                ->with('negara',$negara)
+                ->with('provinsi',$provinsi)
+                ->with('kota',$kota);
+
             $this->layout->seo = View::make('checkout::seostuff')
             ->with('title',"Checkout - Rincian Belanja - ".$this->setting->nama)
             ->with('description',$this->setting->deskripsi)
@@ -117,8 +124,10 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                 ->with('provinsi' ,Provinsi::where('negaraId','=',$this->setting->negara)->get())
                 ->with('pengaturan' ,$pengaturan)
                 ->with('kontak', $this->setting)
-                ->with('akun',Akun::find($this->akunId)
-                );
+                ->with('akun',Akun::find($this->akunId))
+                ->with('negara',$negara)
+                ->with('provinsi',$provinsi)
+                ->with('kota',$kota);
             $this->layout->seo = View::make('checkout::seostuff')
             ->with('title',"Checkout - Rincian Belanja - ".$this->setting->nama)
             ->with('description',$this->setting->deskripsi)
@@ -163,14 +172,40 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
 
         if ($this->setting->checkoutType==1) 
         {
+            $selected = Session::get('ekspedisiId').';'.Session::get('ongkosKirim');
+
+            if(Session::has('ekspedisiId')){
+                $status =1;
+                $ekspedisi = array(
+                    'tujuan' => Session::get('tujuan'),
+                    'ekspedisi' => Session::get('ekspedisiId'),
+                    'tarif' => Session::get('ongkosKirim'),
+                    'negara' => Session::get('negara'),
+                    'provinsi' => Session::get('provinsi'),
+                    'kota' => Session::get('kota')
+                    );
+            }else{
+                $status =0;
+                $ekspedisi=null;
+            }
+            if(Session::has('diskonId')){            
+                $diskon = array('diskonId' => Diskon::find(Session::get('diskonId')), 'besarPotongan'=>Session::get('besarPotongan'));
+            }else{
+                $diskon=null;
+            }
             $this->layout->content = View::make('checkout::step2')->with('cart' ,Shpcart::cart())
                 ->with('provinsi' ,Provinsi::where('negaraId','=',$this->setting->negara)->get())
                 ->with('user',(Sentry::check() ? (Session::has('pengiriman') ? null:Sentry::getUser()):null))
-                ->with('negara', Negara::lists('nama','id'))
-                ->with('provinsi',Provinsi::lists('nama','id'))
-                ->with('kota', Kabupaten::lists('nama','id'))
+                ->with('negara', Negara::remember(24*60)->get())
+                ->with('provinsi',Provinsi::remember(24*60)->get())
+                ->with('kota', Kabupaten::remember(24*60)->get())
                 ->with('usertemp',(Session::has('pengiriman')?Session::get('pengiriman'):null))
-                ->with('kontak', $this->setting);
+                ->with('pengaturan', $this->setting)
+                ->with('ekspedisi',$ekspedisi)
+                ->with('diskon',$diskon)
+                ->with('pajak',Pajak::where('akunId','=',$this->akunId)->first())
+                ->with('kodekupon' ,Session::has('diskonId') ? Diskon::find(Session::get('diskonId'))->kode : '')
+                ->with('kodeunik', Session::get('kodeunik'));
             $this->layout->seo = View::make('checkout::seostuff')
             ->with('title',"Checkout - Data Pembeli dan Pengiriman - ".$this->setting->nama)
             ->with('description',$this->setting->deskripsi)
@@ -193,18 +228,18 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         }
     }
     public function pembayaran(){
-        if ( ! Sentry::check()){
+        /*if ( ! Sentry::check()){
             
             $user = Pelanggan::where('email','=',Input::get('email'))->whereIn('tipe', array(1,2))->where('akunId','=',$this->akunId)->get();
             if($user->count()>0){
                 return Redirect::to('pengiriman')->withInput()->with('message','error')->with('text','Alamat email sudah digunakan. Coba yang lain atau silakan login.');
             }            
-        }
+        }*/
         if(Request::server('REQUEST_METHOD')=='POST'){
             Session::put('pengiriman', Input::all());               
         }        
         Session::forget('pembayaran');
-        $akun = OnlineAkun::where('akunId','=',$this->akunId)->get();      
+        $akun = OnlineAkun::where('akunId','=',$this->akunId)->get(); 
         $doku_account = \DokuAccount::where('akunId',$this->akunId)->first();
         $this->layout->content = View::make('checkout::step3')->with('cart' ,Shpcart::cart())
             ->with('banks',BankDefault::all())
@@ -213,6 +248,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             ->with('paypal' , $akun[0])
             ->with('doku_account',$doku_account)
             ->with('creditcard', $akun[1])
+            ->with('ipaymu', $akun[2])
             ->with('pembayaran',Session::has('pembayaran')? Session::get('pembayaran'):null)
             ->with('kontak', $this->setting);
         $this->layout->seo = View::make('checkout::seostuff')
@@ -440,9 +476,26 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         //check Administration fee,5000.00,1,5000.00
         
         $basket .='Kode Unik,'.($order->total - ($order->ongkosKirim+$total_product)).',1,'.($order->total - ($order->ongkosKirim+$total_product)).';';*/
-        $basket .='Administration fee,'.$doku_account->adminFee.',1,'.$doku_account->adminFee.';';
+        $fee = 0;
+        if($this->pembayaran['doku_type']==1){
+            $fee = $doku_account->bankFee;
+        }
+        else if($this->pembayaran['doku_type']==2){
+            $fee = ($doku_account->walletFee /100)  * $order->total;
+        }
+        else if($this->pembayaran['doku_type']==3){
+            $fee = ($doku_account->ccFee /100)  * $order->total;
+        }
+        else if($this->pembayaran['doku_type']==4){
+            $fee = $doku_account->alfamartFee;
+        }
 
-        $total = number_format($order->total + $doku_account->adminFee,2,'.','');
+        $order->dokuFee = $fee;
+        $order->save();
+
+        $basket .='Administration fee,'.$fee.',1,'.$fee.';';
+
+        $total = number_format($order->total + $fee,2,'.','');
 
         $word =sha1 ($total.$doku_account->sharedKey.$order->kodeOrder);
 
@@ -585,8 +638,11 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         }else if(Session::get('pembayaran')['tipepembayaran']=='creditcard'){
             $pembayaran =3;
         }
-        else if(Session::get('pembayaran')['tipepembayaran']=='doku_payment'){
+        else if(Session::get('pembayaran')['tipepembayaran']=='ipaymu'){
             $pembayaran =4;
+        }          
+        else if(Session::get('pembayaran')['tipepembayaran']=='doku_payment'){
+            $pembayaran =5;
         }            
         
         $order->jenisPembayaran = $pembayaran;
@@ -636,9 +692,9 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             $akun = null;
             if($order->jenisPembayaran==2){
 
-                $paypal_button = $this->generatePaypalButton();   
+                $paypal_button = $this->generatePaypalButton($order);   
 
-            }else if($order->jenisPembayaran==4){
+            }else if($order->jenisPembayaran==5){
                 
                 $doku_payment = $this->createDokuPayment($order);
 
@@ -658,7 +714,6 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
                                     ->with('order',$order)
                                     ->with('paypalbutton',$paypal_button)
                                     ->with('doku_payment',$doku_payment);
-            
             $this->sendEmailOrder($order,$cart_part,$pembayaran_part);
             
 
@@ -696,6 +751,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
 
     private function generatePaypalButton($order){
         //buat button paypal.
+        $akun = OnlineAkun::where('akunId','=',$this->akunId)->get();
         $paypal = new \GoPayPal(THIRD_PARTY_CART);
         $paypal->sandbox = false;
         $paypal->openInNewWindow = true;
@@ -730,6 +786,13 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
     }
 
     private function sendEmailOrder($order,$cart_part,$pembayaran_part){
+        $bank = \View::make('admin.pengaturan.bank')->with('banks', \BankDefault::all()) ->with('banktrans', \Bank::where('akunId','=',$this->akunId)->where('status','=',1)->get());
+        $akun = Akun::find($this->akunId);
+        if($akun->alamatWeb!=''){
+            $url = 'http://'.$akun->alamatWeb.'/konfirmasiorder';
+        }else{
+            $url = 'http://'.$akun->alamatJarvis.'.jstore.co/konfirmasiorder';
+        }
         $data = array(
             'pelanggan'=> $order->nama,
             'pelangganalamat'=> $order->alamat,
@@ -744,7 +807,8 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
             'handphone' => $this->setting->hp,
             'email' => $this->setting->email,
             'pembayaran' => $pembayaran_part,
-            'rekeningbank' => ''
+            'rekeningbank' => $bank,
+            'url' => $url
             );
         
         $template_email = \Templateemail::where('akunId','=',$this->akunId)->where('no','=',1)->first();
@@ -753,6 +817,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         
         $pengirim = $this->datapengirim;
         $pengaturan = $this->setting;
+        $pengirim['emailtoko'] = $pengaturan->email;
         $datapengirim['fromemail']= $this->setting->email;
         $datapengirim['fromtoko']= $this->setting->nama;
 
@@ -760,6 +825,7 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
         $subject = 'Pemberitahuan Order -- '.bind_to_template($data,$template_email->judul); 
         Mail::later(3,'emails.email',array('data'=>$email), function($message) use ($subject,$pengirim)
         {   
+        $message->from($pengirim['emailtoko']);
             $message->to($pengirim['email'], $pengirim['nama'])->subject($subject);
         });
         //kirik email konfirmasi ke email toko
@@ -771,12 +837,12 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
     }
     public function getProvinsi($id)
     {
-        $pro = \Negara::remember(5)->find($id)->provinsi;
+        $pro = \Negara::remember(60)->find($id)->provinsi;
         return \Response::json($pro);
     }
     public function getKabupaten($id)
     {
-        $pro = \Provinsi::remember(5)->find($id)->kabupaten;
+        $pro = \Provinsi::remember(60)->find($id)->kabupaten;
         return \Response::json($pro);
     }
 
@@ -784,5 +850,236 @@ class CheckoutController  extends \Yusidabcs\Checkout\BaseController
     {
         $pro = \Kabupaten::select(array(DB::raw('nama as label')))->where('nama','like','%'.$name.'%')->get();
         return $pro;
+    }
+
+    public function addekspedisi($id){
+        $eks = explode(';',$id);
+        Session::put('tujuan',Input::get('tujuan'));
+        Session::put('negara',Input::get('negara'));
+        Session::put('provinsi',Input::get('provinsi'));
+        Session::put('kota',Input::get('kota'));
+        Session::put('ekspedisiId', $eks[0]);
+        Session::put('ongkosKirim', $eks[1]);
+        return Session::get('ekspedisiId');
+    }
+
+    function checkEkspedisi($id){
+        if(\Cache::has('rajaongkir')){
+            $rs = \Cache::get('rajaongkir');
+        }else{
+            $rs = \RajaOngkir::getCity();
+            \Cache::put('rajaongkir',$rs,60);
+        }
+        $cart = Shpcart::cart()->contents();
+        $berat = 0;
+        foreach ($cart as $value){
+            $beratnew = Produk::find($value['produkId'])->berat;
+            $berat = $berat+ ($value['qty']*$beratnew);
+        }
+
+        //$berat = ceil($berat/1000);
+        $html = '<hr>';
+        if($berat!=0){            
+            $statusApi = $this->setting->statusApi;
+            $alresult = null;
+            $asal = $this->setting->kotaAsal;
+            $results = $rs['rajaongkir']['results'];
+            //cari tujuan pengirim
+            $destination = array_filter($results, function($obj) use ($id)
+            {
+                
+                if( strtolower($obj['city_name']) == strtolower($id))
+                {
+                    return true;
+                }
+                return false;
+                
+            });
+            $destination = array_values($destination)[0];
+
+            //cari kota asal pengirim
+            $origin = array_filter($results, function($obj) use ($asal)
+            {
+                if( strtolower($obj['city_name']) == strtolower($asal))
+                {
+                    return true;
+                }
+                return false;
+                
+            });
+            $origin = array_values($origin)[0];
+
+            $selected_ekspedisi = explode(':', $statusApi);
+            $kurir = '';
+            foreach ($selected_ekspedisi as $key => $value) {
+                if($value == 1){
+                    $kurir = $kurir.'jne:';
+                }
+                elseif($value == 2){
+                    $kurir = $kurir.'tiki:';
+                }
+                elseif($value == 3){
+                    $kurir = $kurir.'pos:';
+                }
+            }
+            $kurir = trim($kurir, ":");
+
+
+            if(\Cache::has('rajaongkir_'.$origin['city_id'].'_'.$destination['city_id'].'_'.$berat.'_'.$kurir )){
+                $alresult = \Cache::get('rajaongkir_'.$origin['city_id'].'_'.$destination['city_id'].'_'.$berat.'_'.$kurir );
+            }else{
+                $alresult = \RajaOngkir::getCost($origin['city_id'],$destination['city_id'],$berat,$kurir);
+                \Cache::put('rajaongkir_'.$origin['city_id'].'_'.$destination['city_id'].'_'.$berat.'_'.$kurir, $alresult, 60*24 );
+            }
+
+            if($alresult!=null){
+                foreach ($alresult['rajaongkir']['results'] as $key=>$item){
+                    if(count($item['costs'])>0){
+                        foreach ($item['costs'] as $service){
+                             $html = $html. '<label class="radio span12" style="margin-left:0;margin-right:10px">
+                              <input style="margin-left:0;margin-right:10px" type="radio" name="ekspedisilist" id="optionsRadios1" value="'.$item['code'].' : '.$service['service'].' '.$service['description'].';'.$service['cost'][0]['value'].'"><small>'.$item['name'].'|'.$service['service'].':
+                              '.$service['description'].' harga : '.price($service['cost'][0]['value']).'</small>
+                            </label>';
+                        }
+                    }
+                } 
+            }
+            
+            $tarif = \Tarif::join('paket','tarif.paketId','=','paket.id')
+                ->whereRaw('(tarif.tujuan ="'.$id.'" or tarif.tujuan LIKE "%'.strtolower($id).'%" or tarif.tujuan LIKE "%'.strtoupper($id).'%" or tarif.tujuan LIKE "%'.ucfirst($id).'%") and paket.akunId='.$this->akunId)
+                ->get();
+
+            $beratLokal = ceil($berat/1000);
+
+            foreach ($tarif as $key => $value) {
+                $html = $html. '<label class="radio">
+                                    <input type="radio" style="margin-left:0;margin-right:10px" name="ekspedisilist" value="'.$value->paket->ekspedisi->nama.' '.$value->nama.';'.$value->harga*$beratLokal.'">
+                                    '.$value->paket->ekspedisi->nama.' '.$value->paket->nama.' - '.price($value->harga*$beratLokal).'
+                                </label><br>';
+            }
+
+            
+
+            if($alresult==null && $tarif->count()==0){
+                $html= $html.'<p>Tidak ditemukan ekpedisi dari <strong>'.$this->pengaturan->kotaAsal.'</strong> ke tujuan : <strong>'.$id.'</strong> <br>
+                    <small><i>untuk informasi pengiriman silakan hubungi kami <a href="'.URL::to('kontak').'">disini</a></i></small>
+                </p>';
+            }else{
+                $html = '<p>Ekspedisi list dari <strong>'.$this->setting->kotaAsal.'</strong> ke tujuan: <strong>'.$id.'</strong> ('.ceil($berat/1000).' Kg)</p>'.$html;
+            }
+        }
+        return '<div id="result_ekspedisi"><hr>'.$html.'<hr></div>';
+    }
+
+    public function updateEkspedisi($id){
+
+        $id = Kabupaten::find($id)->nama;
+
+        if(\Cache::has('rajaongkir')){
+            $rs = \Cache::get('rajaongkir');
+        }else{
+            $rs = \RajaOngkir::getCity();
+            \Cache::put('rajaongkir',$rs,60);
+        }
+        $cart = Shpcart::cart()->contents();
+        $berat = 0;
+        foreach ($cart as $value){
+            $beratnew = \Produk::find($value['produkId'])->berat;
+            $berat = $berat+ ($value['qty']*$beratnew);
+        }
+
+        //$berat = ceil($berat/1000);
+        $html = '';
+
+        if($berat!=0){            
+            $statusApi = $this->setting->statusApi;
+            $alresult = null;
+            $asal = $this->setting->kotaAsal;
+            $results = $rs['rajaongkir']['results'];
+            //cari tujuan pengirim
+            $destination = array_filter($results, function($obj) use ($id)
+            {
+                
+                if( strtolower($obj['city_name']) == strtolower($id))
+                {
+                    return true;
+                }
+                return false;
+                
+            });
+            $destination = array_values($destination)[0];
+            //cari kota asal pengirim
+            $origin = array_filter($results, function($obj) use ($asal)
+            {
+                if( strtolower($obj['city_name']) == strtolower($asal))
+                {
+                    return true;
+                }
+                return false;
+                
+            });
+            $origin = array_values($origin)[0];
+
+            if($statusApi==1){    
+                $alresult = \RajaOngkir::getCost($origin['city_id'],$destination['city_id'],$berat,'jne');
+            }
+            if($statusApi==2){    
+                $alresult = \RajaOngkir::getCost($origin['city_id'],$destination['city_id'],$berat,'tiki');
+            }
+            if($statusApi==3){    
+                $alresult = \RajaOngkir::getCost($origin['city_id'],$destination['city_id'],$berat,'pos');
+            }
+
+            
+            if($alresult!=null){
+                foreach ($alresult['rajaongkir']['results'] as $key=>$item){
+                    if(count($item['costs'])>0){
+                        foreach ($item['costs'] as $service){
+                             $html = $html. '<label class="radio span12" style="margin-left:0;margin-right:10px">
+                              <input style="margin-left:0;margin-right:10px" type="radio" name="ekspedisilist" id="optionsRadios1" value="'.$item['code'].' : '.$service['service'].' '.$service['description'].';'.$service['cost'][0]['value'].'"><small>'.$item['name'].'|'.$service['service'].':
+                              '.$service['description'].' harga : '.price($service['cost'][0]['value']).'</small>
+                            </label>';
+                        }
+                    }
+                } 
+            }
+            
+            $tarif = \Tarif::join('paket','tarif.paketId','=','paket.id')
+                ->whereRaw('(tarif.tujuan ="'.$id.'" or tarif.tujuan LIKE "%'.strtolower($id).'%" or tarif.tujuan LIKE "%'.strtoupper($id).'%" or tarif.tujuan LIKE "%'.ucfirst($id).'%") and paket.akunId='.$this->akunId)
+                ->get();
+
+            $beratLokal = ceil($berat/1000);
+
+            foreach ($tarif as $key => $value) {
+                $html = $html. '<label class="radio">
+                                    <input type="radio" style="margin-left:0;margin-right:10px" name="ekspedisilist" value="'.$value->paket->ekspedisi->nama.' '.$value->nama.';'.$value->harga*$beratLokal.'">
+                                    '.$value->paket->ekspedisi->nama.' '.$value->paket->nama.' - '.price($value->harga*$beratLokal).'
+                                </label><br>';
+            }
+
+            if($html == '')
+            {
+
+                $html= $html.'<p>Tidak ditemukan ekpedisi dari <strong>'.$this->setting->kotaAsal.'</strong> ke tujuan : <strong>'.$id.'</strong> <br>
+                    <small><i>untuk informasi pengiriman silakan hubungi kami <a href="'.URL::to('kontak').'" target="_blank">disini</a></i></small> <a type="button" class="btn btn-link close" data-dismiss="modal" aria-hidden="true">[tutup]</a>
+                </p>
+
+                ';
+                $html = '<div id="result_ekspedisi">'.$html.'<hr></div>';
+                return \Response::json([
+                    'not_found' => true,
+                    'html' => $html
+                    ]);
+            }else{
+                $html = '<p>Ekspedisi list dari <strong>'.$this->setting->kotaAsal.'</strong> ke tujuan: <strong>'.$id.'</strong> ('.ceil($berat/1000).' Kg)</p>'.$html;
+                $html = '<div id="result_ekspedisi">'.$html.'<hr></div>';
+                return \Response::json([
+                    'not_found' => false,
+                    'html' => $html
+                    ]);
+            }
+        }
+        
+        
     }
 }

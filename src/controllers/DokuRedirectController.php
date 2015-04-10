@@ -57,7 +57,12 @@ class DokuRedirectController extends \Illuminate\Routing\Controllers\Controller 
 			}	
 		}
 		$akun = \Akun::find($order->akunId);
-		$url = 'http://'.$akun->alamatJarvis.'.'.\Config::get('app.domain').'/konfirmasiorder/'.$order->id;
+		if($akun->alamatWeb!=''){
+			$url = 'http://'.$akun->alamatWeb.'/konfirmasiorder/'.$order->id;
+		}else{
+			$url = 'http://'.$akun->alamatJarvis.'.'.\Config::get('app.domain').'/konfirmasiorder/'.$order->id;
+		}
+
 		echo "Status : ".$status." <a href='$url'> Klik disini jika halaman tidak terload..</a>";
 		return \Redirect::to($url)
 			->with('message','Success Update Order');

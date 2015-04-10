@@ -5,11 +5,10 @@
 	<div id="psteps_horiz_layout" class="pf-form">
 		<div class="row-fluid">
 			<div class="span12">
-				<div class="step-title btn disabled"><span class="step-order">1.</span> <span class="step-name hidden-phone">Rincian Belanja</span></div>
-				<div class="step-title btn disabled"><span class="step-order">2.</span> <span class="step-name hidden-phone">Data Pembeli Dan Pengiriman</span></div>
-				<div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
-				<div class="step-title btn btn-success"><span class="step-order">4.</span> <span class="step-name">Ringkasan Order</span></div>
-				<div class="step-title btn disabled"><span class="step-order">5.</span> <span class="step-name hidden-phone">Selesai</span></div>
+				<a href="{{URL::to('checkout')}}" data-pjax><div class="step-title btn span3"><span class="step-order">1.</span> <span class="step-name hidden-phone">Rincian Belanja</span></div></a>
+                <a href="{{URL::to('pengiriman')}}" class="span3" data-pjax><div class="step-title btn span12"><span class="step-order">2.</span> <span class="step-name">Data Pembeli</span></div></a>
+				<a href="{{URL::to('pembayaran')}}" class="span3" data-pjax><div class="step-title btn span12"><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>	</a>	
+				<div class="step-title btn btn-success span3"><span class="step-order">4.</span> <span class="step-name">Ringkasan Order</span></div>
 			</div>
 		</div>
 		<div class="row-fluid box">
@@ -183,11 +182,20 @@
 								@if($datapembayaran['tipepembayaran']=='creditcard')
 									<span class="label label-info">Via Credit Card</span>										
 								@endif
-								@if($datapembayaran['tipepembayaran']=='creditcard')
-									<span class="label label-info">Via Credit Card</span>										
+								@if($datapembayaran['tipepembayaran']=='ipaymu')
+									<span class="label label-info">Via IpayMu</span>										
 								@endif
 								@if($datapembayaran['tipepembayaran']=='doku_payment')
-									<img src="{{url('packages/yusidabcs/checkout/img/doku-myshopcart.png')}}">
+									<img src="{{url('packages/yusidabcs/checkout/img/doku-myshopcart.png')}}"> : 
+									@if($datapembayaran['doku_type']==1)
+									<img src="{{url('packages/yusidabcs/checkout/img/bank.jpg')}}" class="img img-responsive">
+									@elseif($datapembayaran['doku_type']==2)
+									<img src="{{url('packages/yusidabcs/checkout/img/wallet.jpg')}}" class="img img-responsive">
+									@elseif($datapembayaran['doku_type']==3)
+									<img src="{{url('packages/yusidabcs/checkout/img/cc.jpg')}}" class="img img-responsive">
+									@elseif($datapembayaran['doku_type']==4)
+									<img src="{{url('packages/yusidabcs/checkout/img/alfamart.jpg')}}" class="img img-responsive">
+									@endif									
 								@endif
 							</div>
 						</div>

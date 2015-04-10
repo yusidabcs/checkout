@@ -5,11 +5,10 @@
     <div id="psteps_horiz_layout" class="pf-form">
         <div class="row-fluid">
             <div class="span12">
-                <div class="step-title btn disabled"><span class="step-order">1.</span> <span class="step-name hidden-phone">Rincian Belanja</span></div>
-                <div class="step-title btn btn-success"><span class="step-order">2.</span> <span class="step-name">Data Pembeli Dan Pengiriman</span></div>
-                <div class="step-title btn disabled"><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
-                <div class="step-title btn disabled"><span class="step-order">4.</span> <span class="step-name hidden-phone">Ringkasan Order</span></div>
-                <div class="step-title btn disabled"><span class="step-order">5.</span> <span class="step-name hidden-phone">Selesai</span></div>
+                <a href="{{URL::to('checkout')}}" data-pjax><div class="step-title btn span3"><span class="step-order">1.</span> <span class="step-name hidden-phone">Rincian Belanja</span></div></a>
+                <div class="step-title btn btn-success span3"><span class="step-order">2.</span> <span class="step-name">Data Pembeli</span></div>
+                <div class="step-title btn disabled span3"><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
+                <div class="step-title btn disabled span3"><span class="step-order">4.</span> <span class="step-name hidden-phone">Ringkasan Order</span></div>
             </div>
         </div>
         <div class="row-fluid box">
@@ -39,22 +38,46 @@
                             <div class="control-group">
                                 <label class="control-label" for="inputEmail"> Negara</label>
                                 <div class="controls" >
-                                    {{Form::select('negara',array('' => '-- Pilih Negara --') + $negara , ($user ? $user->negara :(Input::old("negara")? Input::old("negara") :($usertemp!=null?$usertemp["negara"]:''))), array('required'=>'', 'id'=>'negara'))}}
+
+                                    <select id="negara" name="negara" data-select="chosen" style="width:50%">
+                                        <option value=""> Pilih negara </option>
+                                        @foreach($negara as $item)
+                                        <option value="{{$item->id}}" {{ array_key_exists('negara',$ekspedisi) ? ($ekspedisi['negara'] == $item->id ? 'selected' : '') : ''}}> {{$item->nama}} </option>
+                                        @endforeach
+                                    </select>
+                                    
                                 </div>
                             </div>
                             <div class="control-group">
                                 <label class="control-label" for="inputEmail"> Provinsi</label>
                                 <div class="controls" id="provinsiPlace">
-                                    {{Form::select('provinsi',array('' => '-- Pilih Provinsi --') + $provinsi , ($user ? $user->provinsi :(Input::old("provinsi")? Input::old("provinsi") :($usertemp!=null?$usertemp["provinsi"]:''))),array('required'=>'','id'=>'provinsi'))}}
+                                    
+                                    <select id="provinsi" name="provinsi" data-select="chosen" style="width:50%">
+                                        <option value=""> Pilih provinsi </option>
+                                        @foreach($provinsi as $item)
+                                        <option value="{{$item->id}}" {{ array_key_exists('provinsi',$ekspedisi) ? ($ekspedisi['provinsi'] == $item->id ? 'selected' : '') : ''}}> {{$item->nama}} </option>
+                                        @endforeach
+                                    </select>
+
                                 </div>
                             </div>
                             <div class="control-group">
                                 <label class="control-label" for="inputEmail"> Kota</label>
                                 <div class="controls" id="kotaPlace">
-                                    {{Form::select('kota',array('' => '-- Pilih Kota --') + $kota , ($user ? $user->kota :(Input::old("kota")? Input::old("kota") :($usertemp!=null?$usertemp["kota"]:''))),array('required'=>'','id'=>'kota'))}}
+                                    <select id="kota" name="kota" data-select="chosen" style="width:50%" data-status="{{$pengaturan->statusEkspedisi}}">
+                                        <option value=""> Pilih kota </option>
+                                        @if(array_key_exists('provinsi',$ekspedisi))
+                                            @if($ekspedisi['provinsi'] != NULL || $ekspedisi['provinsi'] != '')
+                                                @foreach($provinsi->find($ekspedisi['provinsi'])->kabupaten as $item)
+                                                <option value="{{$item->id}}" {{ array_key_exists('kota',$ekspedisi) ? ($ekspedisi['kota'] == $item->id ? 'selected' : '') : ''}}> {{$item->nama}} </option>
+                                                @endforeach
+                                            @endif
+                                        @endif
+                                        
+                                    </select>
+
                                 </div>
                             </div>
-
                             <!--  -->
                             <div class="control-group">
                             <label class="control-label" for="inputEmail"> Kode Pos</label>
@@ -107,19 +130,44 @@
                                 <div class="control-group">
                                     <label class="control-label" for="inputNegara">Negara</label>
                                     <div class="controls">
-                                         {{Form::select('negarapenerima',array('' => '-- Pilih Negara --') + $negara , ((Input::old("negarapenerima")? Input::old("negarapenerima") :"")).($usertemp!=null?$usertemp["negarapenerima"]:''), array( 'id'=>'negarapenerima','class="input"'))}}
+                                        
+                                        <select id="negarapenerima" name="negarapenerima" data-select="chosen" style="width:50%">
+                                            <option value=""> Pilih negara </option>
+                                            @foreach($negara as $item)
+                                            <option value="{{$item->id}}" {{ array_key_exists('negara',$ekspedisi) ? ($ekspedisi['negara'] == $item->id ? 'selected' : '') : ''}}> {{$item->nama}} </option>
+                                            @endforeach
+                                        </select>
+
                                     </div>
                                 </div>
                                 <div class="control-group">
                                     <label class="control-label" for="inputProvinsi">Provinsi</label>
                                     <div class="controls">
-                                       {{Form::select('provinsipenerima',array('' => '-- Pilih Provinsi --') + $provinsi , ((Input::old("provinsipenerima")? Input::old("provinsipenerima") :"")).($usertemp!=null?$usertemp["provinsipenerima"]:''),array('id'=>'provinsipenerima'))}}
+                                       
+                                       <select id="provinsipenerima" name="provinsipenerima" data-select="chosen" style="width:50%"> 
+                                            <option value=""> Pilih provinsi </option>
+                                            @foreach($provinsi as $item)
+                                            <option value="{{$item->id}}" {{ array_key_exists('provinsi',$ekspedisi) ? ($ekspedisi['provinsi'] == $item->id ? 'selected' : '') : ''}}> {{$item->nama}} </option>
+                                            @endforeach
+                                        </select>
+
                                     </div>
                                 </div>
                                 <div class="control-group">
                                     <label class="control-label" for="inputKota">Kota</label>
+                                    
                                     <div class="controls">
-                                        {{Form::select('kotapenerima',array('' => '-- Pilih Kota --') + $kota,((Input::old("kotapenerima")? Input::old("kotapenerima") :"")).($usertemp!=null?$usertemp["kotapenerima"]:''), array('id'=>'kotapenerima'))}}
+                                        <select id="kotapenerima" name="kotapenerima" data-select="chosen" style="width:50%" data-status="{{$pengaturan->statusEkspedisi}}">
+                                            <option value=""> Pilih kota </option>
+                                            @if(array_key_exists('provinsi',$ekspedisi))
+                                                @if($ekspedisi['provinsi'] != NULL || $ekspedisi['provinsi'] != '')
+                                                    @foreach($provinsi->find($ekspedisi['provinsi'])->kabupaten as $item)
+                                                    <option value="{{$item->id}}" {{ array_key_exists('kota',$ekspedisi) ? ($ekspedisi['kota'] == $item->id ? 'selected' : '') : ''}}> {{$item->nama}} </option>
+                                                    @endforeach
+                                                @endif
+                                            @endif
+                                        </select>
+
                                     </div>
                                 </div>
                                 <div class="control-group">
@@ -141,5 +189,85 @@
         </div>
     </div>
 
+    <div class="row-fluid">
+            <div class="span12 box-content">
+                <h2>Rincian Belanja</h2>
+                <div class="row-fluid">
+                    <div class="span12">
+                        <table class="table table-bordered table-striped table-condensed">
+                            <tbody>                                                       
+                                <tr>
+                                    <td class="center">
+                                        Subtotal
+                                    </td> 
+                                    <td colspan="2"><span class="price" id='subtotalcart'>{{price(Shpcart::cart()->total())}}</span></td>                             
+                                </tr>
+                                <tr>
+                                    <td class="center">
+                                        Ongkos Kirim
+                                    </td> 
+                                    <td colspan="2">
+
+                                        <span id='ekspedisiname'>
+                                            {{ strtoupper($ekspedisi['ekspedisi']) }} <br>
+                                        </span><br>
+                                        <span id='ekspedisitext'>
+
+
+                                            {{ 
+                                            $pengaturan->statusEkspedisi==2 ? 
+
+                                            '<strong>Free Shipping</strong>' 
+                                            : 
+                                            ( $pengaturan->statusEkspedisi == 3 ? 
+                                            'Pengiriman Menyusul'
+                                            :
+                                            price($ekspedisi != null ? $ekspedisi['tarif'] : 0 ))
+                                        }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="center">
+                                    Potongan/diskon
+                                </td> 
+                                <td colspan="2"><span id='kupontext'>{{$diskon!=null?price($diskon['besarPotongan']):price(0)}}</span></td>               
+                            </tr>    
+                            <tr>
+                                <td class="center">
+                                    Pajak
+                                </td> 
+                                <td colspan="2"><span id='pajaktext'>{{$pajak->status==0? '<span class="label label-success">non-aktif</span>' : $pajak->pajak.'%'}}</td>                            
+                            </tr> 
+                            <tr>
+                                <td>
+                                    Kode Unik
+                                </td> 
+                                <td colspan="2"><span id='kodeuniktext'>{{price($kodeunik)}}</td>                            
+                            </tr> 
+                            <tr class="success">
+                                <td class="center">
+                                    <h3>Total</h3>
+                                </td> 
+                                <td colspan="2"><h3><span id='totalcart'>
+                                    {{price(Shpcart::cart()->total())}}</span></h3></td>                            
+                                </tr>                                                         
+                            </tbody>
+                        </table> 
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr>
+</div>
+
+<div id="update-ekspedisi" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  
+  <div class="modal-body">
+    <h2>Pilih Ekspedisi</h2>
+    <div id='ekspedisiplace'>
+        {{$ekspedisi!=null? "- ".$ekspedisi['ekspedisi']." (".price_format($ekspedisi['tarif']).")<br><br>":''}} 
+    </div>
+  </div>
 </div>
 @endsection

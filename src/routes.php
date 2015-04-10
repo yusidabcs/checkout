@@ -7,6 +7,10 @@ Route::group(array('before' => 'subdomain'), function() {
 
 
 	Route::get('checkout','Yusidabcs\Checkout\CheckoutController@index');
+	Route::get('checkout/addekspedisi/{id}','Yusidabcs\Checkout\CheckoutController@addekspedisi');
+	Route::get('checkout/update-ekspedisi/{id}','Yusidabcs\Checkout\CheckoutController@updateEkspedisi');
+	Route::get('checkout/checkekspedisi/{id}','Yusidabcs\Checkout\CheckoutController@checkEkspedisi');
+
 	Route::post('pengiriman', 'Yusidabcs\Checkout\CheckoutController@pengiriman');
 	Route::get('pengiriman', 'Yusidabcs\Checkout\CheckoutController@pengiriman');
 	Route::post('pembayaran', 'Yusidabcs\Checkout\CheckoutController@pembayaran');

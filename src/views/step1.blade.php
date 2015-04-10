@@ -15,12 +15,10 @@ Selamat, anda berhasil login.
     <div id="psteps_horiz_layout" class="pf-form">
         <div class="row-fluid">
             <div class="span12">
-                <div class="step-title btn btn-success"><span class="step-order">1.</span> <span class="step-name">Rincian Belanja</span></div>
-                <div class="step-title btn disabled "><span class="step-order">2.</span> <span class="step-name hidden-phone">Data Pembeli Dan Pengiriman</span></div>
-                <div class="step-title btn disabled "><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
-                <div class="step-title btn disabled "><span class="step-order">4.</span> <span class="step-name hidden-phone">Ringkasan Order</span></div>
-                <div class="step-title btn disabled "><span class="step-order">5.</span> <span class="step-name hidden-phone">Selesai</span></div>
-            </div>
+               <div class="step-title btn btn-success span3"><span class="step-order">1.</span> <span class="step-name">Rincian Belanja</span></div>
+                <div class="step-title btn disabled span3 "><span class="step-order">2.</span> <span class="step-name hidden-phone">Data Pembeli</span></div>
+                <div class="step-title btn disabled span3"><span class="step-order">3.</span> <span class="step-name hidden-phone">Metode Pembayaran</span></div>
+                <div class="step-title btn disabled span3"><span class="step-order">4.</span> <span class="step-name hidden-phone">Ringkasan Order</span></div>            </div>
         </div>
         <div class="row-fluid box">
             <div class="span12 box-content">
@@ -56,9 +54,9 @@ Selamat, anda berhasil login.
                                     @endif
                                 </td>
                                 <td><input style="width: 60px;" type="number" class="span3 cartqty" placeholder="Qty" value="{{$item['qty']}}" name='{{ $item['rowid'] }}' min="1"></td>
-                                <td>{{ jadiRupiah($item['price'])}}</strong></td> 
+                                <td>{{ price($item['price'])}}</strong></td> 
                                 <td>
-                                    <span class="{{ $item['rowid'] }}"><strong>{{ jadiRupiah($item['price'] * $item['qty'])}}</strong></span>
+                                    <span class="{{ $item['rowid'] }}"><strong>{{ price($item['price'] * $item['qty'])}}</strong></span>
                                 </td>
                                 <td><a onclick="deletecart({{ "'".$item['rowid']."'" }})" href="javascript:void(0);"><i class="halflings-icon trash halflings-icon"></i></a></td>                                     
                             </tr>
@@ -69,7 +67,7 @@ Selamat, anda berhasil login.
                                 <td class="center">
                                     Subtotal
                                 </td> 
-                                <td colspan="2"><span class="price" id='subtotalcart'>{{jadiRupiah(Shpcart::cart()->total())}}</span></td>                             
+                                <td colspan="2"><span class="price" id='subtotalcart'>{{price(Shpcart::cart()->total())}}</span></td>                             
                             </tr>
                             <tr>
                                 <td colspan="2" ></td>
@@ -77,7 +75,7 @@ Selamat, anda berhasil login.
                                 <td class="center">
                                     Ongkos Kirim
                                 </td> 
-                                <td colspan="2"><span id='ekspedisitext'>{{$pengaturan->statusEkspedisi==2 ?'<strong>Free Shipping</strong>' : ($pengaturan->statusEkspedisi==3?'Pengiriman Menyusul':jadiRupiah($ekspedisi!=null?$ekspedisi['tarif']:0))}}</span></td>
+                                <td colspan="2"><span id='ekspedisitext'>{{$pengaturan->statusEkspedisi==2 ?'<strong>Free Shipping</strong>' : ($pengaturan->statusEkspedisi==3?'Pengiriman Menyusul':price($ekspedisi!=null?$ekspedisi['tarif']:0))}}</span></td>
                             </tr>
                             <tr>
                                 <td colspan="2" ></td>
@@ -85,7 +83,7 @@ Selamat, anda berhasil login.
                                 <td class="center">
                                     Potongan/diskon
                                 </td> 
-                                <td colspan="2"><span id='kupontext'>{{$diskon!=null?jadiRupiah($diskon['besarPotongan']):jadiRupiah(0)}}</span></td>               
+                                <td colspan="2"><span id='kupontext'>{{$diskon!=null?price($diskon['besarPotongan']):price(0)}}</span></td>               
                             </tr>    
                              <tr>
                                 <td colspan="2"></td>
@@ -101,7 +99,7 @@ Selamat, anda berhasil login.
                                 <td>
                                     Kode Unik
                                 </td> 
-                                <td colspan="2"><span id='kodeuniktext'>{{jadiRupiah($kodeunik)}}</td>                            
+                                <td colspan="2"><span id='kodeuniktext'>{{price($kodeunik)}}</td>                            
                             </tr> 
                             <tr class="success">
                                 <td colspan="2"></td>
@@ -110,66 +108,103 @@ Selamat, anda berhasil login.
                                     <h3>Total</h3>
                                 </td> 
                                 <td colspan="2"><h3><span id='totalcart'>
-                                    {{jadiRupiah(Shpcart::cart()->total())}}</span></h3></td>                            
+                                    {{price(Shpcart::cart()->total())}}</span></h3></td>                            
                                 </tr>                                                         
                         </tbody>
                     </table> 
-                     <div class="row-fluid">
-                            <div class="span6">
-
-                                <input type="hidden" id="statusPengiriman" value="{{$pengaturan->statusEkspedisi}}">
-                                <input type="hidden" id="statusEkspedisi" value="{{$statusEkspedisi}}">
-                                <input type="hidden" id="ekspedisilist" value="{{$ekspedisi!=null? $ekspedisi['ekspedisi'].';'.$ekspedisi['tarif']:''}}">
-
-                                <div class="well">
-                                @if($pengaturan->statusEkspedisi==1)
-                                        <h4>Biaya Pegiriman</h4>
-                                        <small>Masukkan kota tujuan anda untuk menghitung biaya pengiriman</small><br><br>
-                                        <div class="form-horizontal" id="searchkota">
-                                            <input style="width: 50%;" type="text" class="input" id='tujuan' placeholder="Kota tujuan pengiriman..." value="{{$ekspedisi!=null?$ekspedisi['tujuan']:''}}">
-                                            <button type="button" class="btn" id='ekspedisibtn'>Cari</button>                                            
-                                        </div>
-                                        <br>
-                                        <div id='ekspedisiplace'>
-                                            {{$ekspedisi!=null? "- ".$ekspedisi['ekspedisi']."<br><br>":''}}
-                                        </div>
-                                        <small style="font-style: italic;">(*) Bila kota anda tidak ditemukan atau tidak ada dalam daftar, pilihlah kota yang terdekat</small>
-                                @elseif($pengaturan->statusEkspedisi==2)
-                                    <h2 class="text-center">Pengiriman Gratis</h2>
-                                    <p class="text-center"><small>Anda tidak dikenakan biaya pengirimiman pada order ini.</small></p>                                
-                                @elseif($pengaturan->statusEkspedisi==3)
-                                    <h2 class="text-center">Pengiriman Menyusul</h2>
-                                    <p class="text-center"><small>{{$pengaturan->keteranganEkspedisi}}</small></p>
-                                @endif
-
+                    <div class="row-fluid">
+                            <div class="span12">
+                                <div style="text-align: right;">
+                                     <a type="button" class="btn btn-link" name='kupondiskon' id="kupontanya" value="Pakai Kupon Diskon"><label for="kuponplace"><small>Punya Kupon ?</small></label></a>
+                                    <input type="hidden" value="0" id="kuponstatus">                                
                                 </div>
-
-                            </div>
-                            <div class="span6">
-                                <div class="well">
-                                        <h4>Kode Diskon</h4>
-                                        <small>Gunakan kode kupon pada kolom dibawah jika ada</small><br><br>
-                                        <div class="form-horizontal">
-                                            <input style="width: 50%;" type="text" class="input" placeholder="Kode kupon..." name='kodeplace' id='kuponplace' value="{{$diskon!=null? $diskon['diskonId']->kode:''}}" {{$diskon!=null? 'disabled':''}} onkeyup="alphanum(this)">
-                                            <button type="submit" class="btn" id='kuponbtn'>{{$diskon!=null? 'Cancel':'Pakai Kupon'}}</button>
-                                            {{$diskon!=null? '<input type="hidden" id="diskonstatus" value="1">':''}}
-                                            
+                                <div class="row-fluid">
+                                    <div class="span12" id="diskonform" style="display: none;">
+                                        <div class="well">
+                                            <h4>Kupon Diskon</h4>
+                                            <small>Masukan kode kupon anda</small><br>
+                                            <div class="form-horizontal">
+                                                <input style="width: 50%;" type="text" class="input" placeholder="Kode kupon..." name='kodeplace' id='kuponplace' value="{{$diskon!=null? $diskon['diskonId']->kode:''}}" {{$diskon!=null? 'disabled':''}} onkeyup="alphanum(this)">
+                                                <button type="submit" class="btn" id='kuponbtn'>{{$diskon!=null? 'Cancel':'Pakai Kupon'}}</button>
+                                                {{$diskon!=null? '<input type="hidden" id="diskonstatus" value="1">':''}}
+                                                
+                                            </div>
                                         </div>
-
                                     </div>
+                                </div>
+                                <div class="row-fluid">
+                                    
+                                    <div class="span12">
+                                        <input type="hidden" id="statusPengiriman" value="{{$pengaturan->statusEkspedisi}}">
+                                        <input type="hidden" id="statusEkspedisi" value="{{$statusEkspedisi}}">
+                                        <input type="hidden" id="ekspedisilist" value="{{$ekspedisi!=null? $ekspedisi['ekspedisi'].';'.$ekspedisi['tarif']:''}}">
+
+                                        <div class="well">
+                                        @if($pengaturan->statusEkspedisi==1)
+                                                <h4>Biaya Pengiriman</h4>
+                                                <small>Masukkan kota tujuan anda untuk menghitung biaya pengiriman</small><br><br>
+                                                <form class="form-inline">
+                                                <div class="row-fluid">
+                                                    <div class="span3">
+                                                        <select class="" id="pengiriman-negara" data-select="chosen" style="width:100%" name="negara">
+                                                            <option>Pilih Negara</option>
+                                                            @foreach($negara as $item)
+                                                            <option value="{{$item->id}}">{{$item->nama}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                    <div class="span3">
+                                                        <select class="" id="pengiriman-provinsi" data-select="chosen" style="width:100%" name="provinsi">
+                                                            <option>Pilih Provinsi</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="span3">
+                                                        <select class="" id="pengiriman-kota" data-select="chosen" style="width:100%" name="kota">
+                                                            <option>Pilih Kota</option>
+                                                        </select>
+                                                        
+                                                    </div>
+                                                    <div class="span3">
+                                                        <button type="button" class="btn" id='ekspedisibtn' style="display:none">Cari</button>
+                                                    </div>
+                                                </div>
+                                                </form>
+
+                                                <!-- <div class="form-horizontal" id="searchkota">
+                                                    <input style="width: 50%;" type="text" class="input" id='tujuan' placeholder="Kota tujuan pengiriman..." value="{{$ekspedisi!=null?$ekspedisi['tujuan']:''}}">
+                                                    
+                                                </div>
+                                                <br> -->
+                                                <div id='ekspedisiplace'>
+                                                    {{$ekspedisi!=null? "- ".$ekspedisi['ekspedisi']." (".price_format($ekspedisi['tarif']).")<br><br>":''}} 
+                                                </div>
+                                                <small style="font-style: italic;">(*) Bila kota anda tidak ditemukan atau tidak ada dalam daftar, pilihlah kota yang terdekat atau hubungi penjual</small>
+                                        @elseif($pengaturan->statusEkspedisi==2)
+                                            <h2 class="text-center">Pengiriman Gratis</h2>
+                                            <p class="text-center"><small>Anda tidak dikenakan biaya pengirimiman pada order ini.</small></p>                                
+                                        @elseif($pengaturan->statusEkspedisi==3)
+                                            <h2 class="text-center">Pengiriman Menyusul</h2>
+                                            <p class="text-center"><small>{{$pengaturan->keteranganEkspedisi}}</small></p>
+                                        @endif
+
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                
                             </div>
-                        </div>
-                        <table>
-                            <tr>
-                                <td>
-                                    
-                                </td>
-                                <td>
-                                    
-                                </td>
-                                                         
-                            </tr> 
-                        </table>
+                    </div>
+                    <table>
+                        <tr>
+                            <td>
+                                
+                            </td>
+                            <td>
+                                
+                            </td>
+                                                     
+                        </tr> 
+                    </table>
                         {{Form::close()}}
                         @if ( !Sentry::check())
                         <div class="row-fluid">
@@ -200,7 +235,7 @@ Selamat, anda berhasil login.
                                 <small>Anda tidak perlu menjadi member untuk berbelanja. Silakan klik tombol "Lanjut ke data pengiriman" untuk melanjutkan. Untuk mempercepat proses belanja dimasa mendatang plus mendapatkan sejumlah tawaran menarik lainnya, anda dapat mendaftar menjadi member dihalaman pendafaran/registrasi.</small><br><br>
                                 <a href="{{URL::to('produk')}}" class="btn btn-warning hidden-phone">Lihat Produk Lainnya</a>
                                 <a href="{{URL::to('produk')}}" class="btn btn-warning hidden-desktop" style="float: left;">Back</a>
-                                <button type="submit" class="btn btn-info next-button">Lanjut sebagai Guest</button>
+                                <button type="submit" class="btn btn-info next-button" id="form1">Lanjut sebagai Guest</button>
                                 <div class="clear"></div>
                             </div>
                         </div>
@@ -224,5 +259,4 @@ Selamat, anda berhasil login.
 
     </div>
 </div>
-
 @endsection
